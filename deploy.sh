@@ -6,6 +6,7 @@ if [ ! -d "hospicesys" ]; then
     exit 1
 fi
 
+
 # Step 2: Update apt repositories and install all necessary packages
 echo "Updating apt repositories and installing necessary packages..."
 sudo apt update
