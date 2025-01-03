@@ -1,0 +1,207 @@
+{% extends "doctors/base.html" %}
+
+{% block title %}Doctors{% endblock %}
+
+{% load static %}
+
+{% block breadcrumb %}Reviews{% endblock %}
+{% block breadcrumb1 %}Reviews{% endblock %}
+
+{% block sidenav %}
+	<ul>
+		<li>
+			<a href="{% url 'doctor-dashboard' %}">
+				<i class="fas fa-columns"></i>
+				<span>Dashboard</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'appointments' %}">
+				<i class="fas fa-calendar-check"></i>
+				<span>Appointments</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'my-patients' %}">
+				<i class="fas fa-user-injured"></i>
+				<span>My Patients</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'schedule-timings' %}">
+				<i class="fas fa-hourglass-start"></i>
+				<span>Schedule Timings</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'invoices' %}">
+				<i class="fas fa-file-invoice"></i>
+				<span>Invoices</span>
+			</a>
+		</li>
+		<li class="active">
+			<a href="{% url 'reviews' %}">
+				<i class="fas fa-star"></i>
+				<span>Reviews</span>
+			</a>
+		</li>
+ 
+		<li>
+			<a href="{% url 'doctor-profile-settings' %}">
+				<i class="fas fa-user-cog"></i>
+				<span>Profile Settings</span>
+			</a>
+		</li>
+ 
+		<li>
+			<a href="{% url 'doctor-change-password' %}">
+				<i class="fas fa-lock"></i>
+				<span>Change Password</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'logout' %}">
+				<i class="fas fa-sign-out-alt"></i>
+				<span>Logout</span>
+			</a>
+		</li>
+	</ul>
+{% endblock %}
+
+{% block content %}									
+	<div class="col-md-7 col-lg-8 col-xl-9">
+		<div class="doc-review review-listing">
+		
+			<!-- Review Listing -->
+			<ul class="comments-list">
+			{% for review in reviews %}
+			
+				<!-- Comment List -->
+				<li>
+					<div class="comment">
+						<img class="avatar rounded-circle" alt="User Image" src="{{review.appointment.patient.image.url}}">
+						<div class="comment-body">
+							<div class="meta-data">
+								<span class="comment-author">{{review.appointment.patient.first_name}} {{review.appointment.patient.second_name}}</span>
+								<span class="comment-date">Reviewed {{ review.date|timesince }} ago</span>
+								<div class="review-count rating">
+								{% for rate in review.review_rate.values %}
+									<i class="fas fa-star {{rate}}"></i>
+								{% endfor %}
+								</div>
+							</div>
+							{% if review.recommend %}
+								<p class="recommended">
+									<i class="far fa-thumbs-up"></i> I recommend the doctor
+								</p>
+							{% elif not review.recommend %}
+								<p class="recommended" style="color: red;">
+									<i class="far fa-thumbs-down"></i> I do not recommend the doctor
+								</p>
+							{% endif %}
+							<p class="comment-content">
+								{{review.text}}
+							</p>
+							<div class="comment-reply">
+								<a class="comment-btn" href="#" data-toggle="modal" data-target="#add_reply_{{review.id}}">
+									<i class="fas fa-reply"></i> Reply
+								</a>
+								<p class="recommend-btn">
+									<span>Recommend?</span>
+									{% if review.doctor_liked == None %}
+										<a href="{% url 'like-review' review.id %}" class="like-btn ajax-link">
+											<i class="far fa-thumbs-up"></i> Yes({{review.total_likes}})
+										</a>
+										<a href="{% url 'dislike-review' review.id %}" class="dislike-btn ajax-link">
+											<i class="far fa-thumbs-down"></i> No({{review.total_dislikes}})
+										</a>
+									{% elif review.doctor_liked %}
+										<a href="{% url 'like-review' review.id %}" class="like-btn ajax-link" style="color: green;">
+											<i class="far fa-thumbs-up"></i> Yes({{review.total_likes}})
+										</a>
+										<a href="{% url 'dislike-review' review.id %}" class="dislike-btn ajax-link">
+											<i class="far fa-thumbs-down"></i> No({{review.total_dislikes}})
+										</a>
+									{% elif not review.doctor_liked %}
+										<a href="{% url 'like-review' review.id %}" class="like-btn ajax-link">
+											<i class="far fa-thumbs-up"></i> Yes({{review.total_likes}})
+										</a>
+										<a href="{% url 'like-review' review.id %}" class="dislike-btn ajax-link" style="color: red;">
+											<i class="far fa-thumbs-down"></i> No({{review.total_dislikes}})
+										</a>
+									{% endif %}
+								</p>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Comment Reply -->
+					<ul class="comments-reply">
+					{% for reply in review.replies %}
+						<!-- Comment Reply List -->
+						<li>
+							<div class="comment">
+								<img class="avatar rounded-circle" alt="User Image" src="{{reply.get_user.image.url}}">
+								<div class="comment-body">
+									<div class="meta-data">
+										<span class="comment-author">{{reply.get_user.title}} {{reply.get_user.first_name}} {{reply.get_user.second_name}}</span>
+										<span class="comment-date">Reviewed {{reply.date|timesince}} ago</span>
+									</div>
+									<p class="comment-content">
+										{{reply.text}}
+									</p>
+								</div>
+							</div>
+						</li>
+						<!-- /Comment Reply List -->
+					{% endfor %}
+					</ul>
+					<!-- /Comment Reply -->
+					
+				</li>
+				<!-- /Comment List -->
+			{% endfor %}
+				
+			</ul>
+			<!-- /Comment List -->
+			
+		</div>
+	</div>
+{% endblock %}	
+
+{% block modal %}	
+	{% for review in reviews %}
+	<!-- Add Review Modal -->
+	<div class="modal fade custom-modal" id="add_reply_{{review.id}}">
+		<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3 class="modal-title">Reply</h3>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				</div>
+				<form class="add-form" method="POST" action="{% url 'reply-review' %}">					
+					{% csrf_token %}
+					<div class="modal-body">
+						<input type="text" name="review" value="{{review.id}}" style="display: none;">
+						<input type="text" name="next" value="{{request.path_info}}" style="display: none;">
+						<div class="form-group">
+							<label>Reply</label>
+							<textarea id="review_desc" maxlength="100" class="form-control" name="text" required></textarea>
+							<div class="d-flex justify-content-between mt-3"><small class="text-muted"><span id="chars">100</span> characters remaining</small></div>
+						</div>
+						<div class="submit-section text-center">
+							<button type="submit" class="btn btn-primary submit-btn">Post</button>
+							<button type="button" class="btn btn-secondary submit-btn" data-dismiss="modal">Cancel</button>							
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<!-- /Add Review Modal -->
+	{% endfor %}
+{% endblock %}
+
+{% block javascript %}
+	<script src="{% static 'cas/js/ajax.js' %}"></script>
+{% endblock %}

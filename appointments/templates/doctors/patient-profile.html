@@ -1,0 +1,499 @@
+{% extends "cas/base.html" %}
+
+{% block title %} {{patient}} profile Check-Out{% endblock %}
+
+{% load static %}
+{% block css %}
+	<!-- Datetimepicker CSS -->
+	<link rel="stylesheet" href="{% static 'cas/css/bootstrap-datetimepicker.min.css' %}">
+{% endblock %}
+
+{% block content %}
+	<!-- Breadcrumb -->
+	<div class="breadcrumb-bar">
+		<div class="container-fluid">
+			<div class="row align-items-center">
+				<div class="col-md-12 col-12">
+					<nav aria-label="breadcrumb" class="page-breadcrumb">
+						<ol class="breadcrumb">
+							<li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+							<li class="breadcrumb-item active" aria-current="page">Patient Profile</li>
+						</ol>
+					</nav>
+					<h2 class="breadcrumb-title">Patient Profile</h2>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /Breadcrumb -->
+			
+	<!-- Page Content -->
+	<div class="content">
+		<div class="container-fluid">
+
+			<div class="row">
+				<div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar dct-dashbd-lft">
+						
+					<!-- Profile Widget -->
+					<div class="card widget-profile pat-widget-profile">
+						<div class="card-body">
+							<div class="pro-widget-content">
+								<div class="profile-info-widget">
+									<a href="#" class="booking-doc-img">
+										<img src="{{patient.image.url}}" alt="User Image">
+									</a>
+									<div class="profile-det-info">
+										<h3>{{patient}}</h3>
+										
+										<div class="patient-details">
+											<h5><b>Patient ID :</b> PT000{{patient.id}}</h5>
+											<h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> {{patient.county}}, {{patient.country}}</h5>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="patient-info">
+								<ul>
+									<li>Phone <span>{{patient.phone_no}}</span></li>
+									<li>Age <span>{{patient.d_o_b|timesince}}, {{patient.gender}}</span></li>
+									<li>Blood Group <span>{{patient.blood_group}}</span></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<!-- /Profile Widget -->
+							
+					<!-- Last Booking -->
+					<div class="card">
+						<div class="card-header">
+							<h4 class="card-title">Last Booking</h4>
+						</div>
+						<ul class="list-group list-group-flush">
+						{% for appointment in last_appointments %}
+							<li class="list-group-item">
+								<div class="media align-items-center">
+									<div class="mr-3">
+										<img alt="Image placeholder" src="{{appointment.doctor.image.url}}" class="avatar  rounded-circle">
+									</div>
+									<div class="media-body">
+										<h5 class="d-block mb-0">{{appointment.doctor.full_name}} </h5>
+										<span class="d-block text-sm text-muted">{{appointment.doctor.speciality.name}}</span>
+										<span class="d-block text-sm text-muted">{{appointment.booking_date}}</span>
+									</div>
+								</div>
+							</li>
+						{% endfor %}
+						</ul>
+					</div>
+					<!-- /Last Booking -->
+				
+				</div>
+
+			<div class="col-md-7 col-lg-8 col-xl-9 dct-appoinment">
+				<div class="card">
+					<div class="card-body pt-0">
+						<div class="user-tabs">
+							<ul class="nav nav-tabs nav-tabs-bottom nav-justified flex-wrap">
+								<li class="nav-item">
+									<a class="nav-link active" href="#pat_appointments" data-toggle="tab">Appointments</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" href="#pres" data-toggle="tab"><span>Prescription</span></a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" href="#medical" data-toggle="tab"><span class="med-records">Medical Records</span></a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" href="#billing" data-toggle="tab"><span>Billing</span></a>
+								</li> 
+							</ul>
+						</div>
+						<div class="tab-content">
+										
+							<!-- Appointment Tab -->
+							<div id="pat_appointments" class="tab-pane fade show active">
+								<div class="card card-table mb-0">
+									<div class="card-body">
+										<div class="table-responsive">
+											<table class="table table-hover table-center mb-0">
+												<thead>
+													<tr>
+														<th>Doctor</th>
+														<th>Appt Date</th>
+														<th>Booking Date</th>
+														<th>Amount</th>
+														<th>Follow Up</th>
+														<th>Status</th>
+														<th></th>
+													</tr>
+												</thead>
+												<tbody>
+												{% for appointment in last_appointments %}
+													<tr>
+														<td>
+															<h2 class="table-avatar">
+																<a href="{% url 'doctor-profile' appointment.doctor.full_name|slugify appointment.doctor.id %}" class="avatar avatar-sm mr-2">
+																	<img class="avatar-img rounded-circle" src="{{appointment.doctor.image.url}}" alt="User Image">
+																</a>
+																<a href="{% url 'doctor-profile' appointment.doctor.full_name|slugify appointment.doctor.id %}">{{appointment.doctor.full_name}}<span>{{appointment.doctor.speciality.name}}</span></a>
+															</h2>
+														</td>
+														<td>{{appointment.booking_date.date}}<span class="d-block text-info">{{appointment.booking_date.time}}</span></td>
+														<td>{{appointment.date.date}}</td>
+														<td>$ {{appointment.amount}}</td>
+														<td>{{appointment.follow_up_date}}</td>
+													{% if appointment.status == 'WAIT' %}
+														<td><span class="badge badge-pill bg-warning-light">Pending</span></td>
+														<td class="text-right">
+															<div class="table-action">
+																<a href="{% url 'appointment-accept' appointment.purpose|slugify appointment.id %}" class="btn btn-sm bg-success-light ajax-link">
+																	<i class="fas fa-check"></i> Accept
+																</a>
+																<a href="{% url 'appointment-cancel' appointment.purpose|slugify appointment.id %}" class="btn btn-sm bg-danger-light ajax-link">
+																	<i class="far fa-trash-alt"></i> Cancel
+																</a>
+															</div>
+														</td>
+													{% elif appointment.status == 'ACCEPTED' %}
+														<td><span class="badge badge-pill bg-success-light">Confirm</span></td>
+														<td class="text-right">
+															<div class="table-action">
+																<a href="{% url 'appointment-complete' appointment.purpose|slugify appointment.id %}" class="btn btn-sm bg-primary-light ajax-link">
+																	<i class="fas fa-check-double"></i> Complete
+																</a>
+															</div>
+														</td>
+													{% elif appointment.status == 'CANCELLED' %}
+														<td><span class="badge badge-pill bg-danger-light">Cancelled</span></td>
+														<td class="text-right">
+															<div class="table-action">
+																<a href="{% url 'appointment-accept' appointment.purpose|slugify appointment.id %}" class="btn btn-sm bg-success-light ajax-link">
+																	<i class="fas fa-check"></i> Accept
+																</a>
+															</div>
+														</td>
+ 
+													{% endif %}
+													</tr>
+												{% endfor %}
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- /Appointment Tab -->
+										
+							<!-- Prescription Tab -->
+							<div class="tab-pane fade" id="pres">
+								<div class="text-right">
+									<a href="{% url 'add-prescription' patient|slugify patient.id %}" class="add-new-btn">Add Prescription</a>
+								</div>
+								<div class="card card-table mb-0">
+									<div class="card-body">
+										<div class="table-responsive">
+											<table class="table table-hover table-center mb-0">
+												<thead>
+													<tr>
+														<th>Date </th>
+														<th>Name</th>									
+														<th>Created by </th>
+														<th></th>
+													</tr>     
+												</thead>
+												<tbody>
+												{% for prescription in prescriptions %}
+													<tr>
+														<td>{{prescription.date.date}}</td>
+														<td>{{prescription.name}}</td>
+														<td>
+															<h2 class="table-avatar">
+																<a href="{% url 'doctor-profile' prescription.doctor.full_name|slugify prescription.doctor.id %}" class="avatar avatar-sm mr-2">
+																	<img class="avatar-img rounded-circle" src="{{prescription.doctor.image.url}}" alt="User Image">
+																</a>
+																<a href="{% url 'doctor-profile' prescription.doctor.full_name|slugify prescription.doctor.id %}">{{prescription.doctor.full_name}} <span>{{prescription.doctor.speciality.name}}</span></a>
+															</h2>
+														</td>
+														<td class="text-right">
+															<div class="table-action">
+ 
+																<a href="javascript:void(0);" class="btn btn-sm bg-info-light" data-toggle="modal" data-target="#presc{{prescription.id}}_details">
+																	<i class="far fa-eye"></i> View
+																</a>
+															{% if prescription.doctor.id == profile.id %}
+																<a href="{% url 'edit-prescription' patient.id  prescription.name|slugify prescription.id %}" class="btn btn-sm bg-success-light">
+																	<i class="fas fa-edit"></i> Edit
+																</a>
+																<a href="{% url 'delete-prescription' prescription.name|slugify prescription.id %}" class="btn btn-sm bg-danger-light ajax-link">
+																	<i class="far fa-trash-alt"></i> Delete
+																</a>
+															{% endif %}
+															</div>
+														</td>
+													</tr>
+												{% endfor %}
+												</tbody>	
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- /Prescription Tab -->
+
+							<!-- Medical Records Tab -->
+							<div class="tab-pane fade" id="medical">
+								<div class="text-right">		
+									<a href="#" class="add-new-btn" data-toggle="modal" data-target="#add_medical_records">Add Medical Records</a>
+								</div>
+								<div class="card card-table mb-0">
+									<div class="card-body">
+										<div class="table-responsive">
+											<table class="table table-hover table-center mb-0">
+												<thead>
+													<tr>
+														<th>ID</th>
+														<th>Date </th>
+														<th>Description</th>
+														<th>Attachment</th>
+														<th>Created</th>
+														<th></th>
+													</tr>     
+												</thead>
+												<tbody>
+												{% for record in records %}
+													<tr>
+														<td><a href="javascript:void(0);">#MR-000{{record.id}}</a></td>
+														<td>{{record.date_recorded}}</td>
+														<td>{{record.description}}</td>
+														<td><a href="{{record.attachment.url}}">{{record.attachment}}</a></td>
+														<td>
+															<h2 class="table-avatar">
+																<a href="{% url 'doctor-profile' record.doctor.full_name|slugify record.doctor.id %}" class="avatar avatar-sm mr-2">
+																	<img class="avatar-img rounded-circle" src="{{record.doctor.image.url}}" alt="User Image">
+																</a>
+																<a href="{% url 'doctor-profile' record.doctor.full_name|slugify record.doctor.id %}">{{record.doctor.full_name}}<span>{{record.doctor.speciality.name}}</span></a>
+															</h2>
+														</td>
+														<td class="text-right">
+															<div class="table-action">
+ 
+																<a href="{{record.attachment.url}}" class="btn btn-sm bg-info-light">
+																	<i class="far fa-eye"></i> View
+																</a>
+															{% if record.doctor.id == profile.id %}
+																<a href="{% url 'edit-medical-record' record.patient.id record.patient|slugify record.id %}" class="btn btn-sm bg-success-light">
+																	<i class="fas fa-edit"></i> Edit
+																</a>
+																<a href="{% url 'delete-medical-record' record.patient|slugify record.id %}" class="btn btn-sm bg-danger-light ajax-link">
+																	<i class="far fa-trash-alt"></i> Delete
+																</a>
+															{% endif %}
+															</div>
+														</td>
+													</tr>
+												{% endfor %}
+																
+												</tbody>  	
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- /Medical Records Tab -->
+										
+										<!-- Billing Tab -->
+										<div class="tab-pane" id="billing">
+											<div class="card card-table mb-0">
+												<div class="card-body">
+													<div class="table-responsive">
+													
+														<table class="table table-hover table-center mb-0">
+															<thead>
+																<tr>
+																	<th>Invoice No</th>
+																	<th>Doctor</th>
+																	<th>Amount</th>
+																	<th>Paid On</th>
+																	<th></th>
+																</tr>
+															</thead>
+															<tbody>
+															{% for invoice in invoices %}
+																<tr>
+																	<td>
+																		<a href="invoice-view.html">#INV-000{{invoice.id}}</a>
+																	</td>
+																	<td>
+																		<h2 class="table-avatar">
+																			<a href="{% url 'doctor-profile' invoice.doctor.full_name|slugify invoice.doctor.id %}" class="avatar avatar-sm mr-2">
+																				<img class="avatar-img rounded-circle" src="{{invoice.doctor.image.url}}" alt="User Image">
+																			</a>
+																			<a href="{% url 'doctor-profile' invoice.doctor.full_name|slugify invoice.doctor.id %}">{{invoice.doctor.full_name}} <span>{{invoice.doctor.speciality.name}}</span></a>
+																		</h2>
+																	</td>
+																	<td>$ {{invoice.total_amount}}</td>
+																	<td>{{invoice.date_paid.date}}</td>
+																	<td class="text-right">
+																		<div class="table-action">
+ 
+																			<a href="{% url 'invoice' invoice.patient|slugify invoice.id %}" class="btn btn-sm bg-info-light">
+																				<i class="far fa-eye"></i> View
+																			</a>
+																		</div>
+																	</td>
+																</tr>
+															{% endfor %}
+															</tbody>
+														</table>
+													</div>
+												</div>
+											</div>
+										</div>
+										<!-- Billing Tab -->
+												
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+			</div>		
+			<!-- /Page Content -->
+{% endblock %}
+
+{% block modal %}	
+	<!-- Add Medical Records Modal -->
+	<div class="modal fade custom-modal" id="add_medical_records">
+		<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3 class="modal-title">Medical Records</h3>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				</div>
+				<form enctype="multipart/form-data" method="post" action="{% url 'add-medical-record' patient|slugify patient.id %}">					
+					<div class="modal-body">
+						{% csrf_token %}
+						<input type="text" name="patient" value="{{patient.id}}" style="display: none;">
+						<input type="text" name="doctor" value="{{profile.id}}" style="display: none;">
+						<div class="form-group">
+							<label>Date</label>
+							<input type="text" class="form-control datetimepicker" name="date_recorded" placeholder="YYYY-MM-DD" required>
+						</div>
+						<div class="form-group">
+							<label>Description ( Name )</label>
+							<textarea class="form-control" name="description" required></textarea>
+						</div>
+						<div class="form-group">
+							<label>Upload File</label> 
+							<input type="file" class="form-control" name="attachment" required>
+						</div>	
+						<div class="submit-section text-center">
+							<button type="submit" class="btn btn-primary submit-btn">Submit</button>
+							<button type="button" class="btn btn-secondary submit-btn" data-dismiss="modal">Cancel</button>							
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<!-- /Add Medical Records Modal -->
+	{% for prescription in prescriptions %}
+	<!-- Appointment Details Modal -->
+	<div class="modal fade custom-modal" id="presc{{prescription.id}}_details">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Prescription Details</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<ul class="info-details">
+						<li>
+							<div class="details-header">
+								<div class="row">
+									<div class="col-md-6">
+										<span class="title">#PRESC000{{prescription.id}}</span>
+										<span class="text">{{prescription.date}}</span>
+									</div>
+									<div class="col-md-6">
+										<div class="text-right">
+										{% if prescription.valid %}
+											<button type="button" class="btn bg-success-light btn-sm" id="topup_status">Valid</button>
+										{% else %}
+											<button type="button" class="btn bg-danger-light btn-sm" id="topup_status">invalid</button>
+										{% endif %}
+										</div>
+									</div>
+								</div>
+							</div>
+						</li>
+						<li>
+							<span class="title">Name:</span>
+							<span class="text">{{prescription.name}}</span>
+						</li>
+						<li>
+							<span class="title">Doctor:</span>
+							<span class="text">{{prescription.doctor.full_name}}</span>
+						</li>
+						<li>
+							<span class="title">Patient:</span>
+							<span class="text">{{prescription.patient}}</span>
+						</li>						
+						<li>
+							<span class="title">Start Date:</span>
+							<span class="text">{{prescription.date}}</span>
+						</li>
+						<li>
+							<span class="title">End Date:</span>
+							<span class="text">{{prescription.end_date}}</span>
+						</li>
+						<li>
+							<span class="title">Quantity:</span>
+							<span class="text">{{prescription.quantity}} per Period</span>
+						</li>
+						<li>
+							<span class="title">Period:</span>
+							<span class="text">
+							{% if prescription.morning %}
+								morning, 
+							{% endif %}
+							{% if prescription.afternoon %}
+								afternoon, 
+							{% endif %}
+							{% if prescription.evening %}
+								evening, 
+							{% endif %}
+							{% if prescription.night %}
+								night,
+							{% endif %}</span>
+
+						</li>
+						<li>
+							<span class="title">Status:</span>
+							{% if prescription.valid %}
+							<span class="text">Valid</span>
+							{% else %}
+							<span class="text">invalid</span>
+							{% endif %}
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /Appointment Details Modal -->
+	{% endfor %}
+{% endblock %}	  
+
+{% block javascript %}		
+	<!-- Datetimepicker JS -->
+	<script src="{% static 'cas/js/moment.min.js' %}"></script>
+	<script src="{% static 'cas/js/bootstrap-datetimepicker.min.js' %}"></script>
+
+	<!-- Custom JS -->
+	<script src="{% static 'cas/js/ajax.js' %}"></script>
+ {% endblock %}		

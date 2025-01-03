@@ -1,0 +1,329 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>{% block title %}Conversations{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="{% static 'chat/styles.css' %}" rel="stylesheet">
+    <link href="{% static 'chat/ClassView.css' %}" rel="stylesheet">
+    <link href="{% static 'chat/conversations.css' %}" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/869e8d43b7.js" crossorigin="anonymous"></script>
+    <link href="{% static 'cas/img/favicon.png' %}" rel="icon">
+
+    		<!-- Favicons -->
+		<link href="{% static 'cas/img/favicon.png' %}" rel="icon">
+		
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="{% static 'cas/css/bootstrap.min.css' %}">
+		
+		<!-- Fontawesome CSS -->
+		<link rel="stylesheet" href="{% static 'cas/plugins/fontawesome/css/fontawesome.min.css' %}">
+		<link rel="stylesheet" href="{% static 'cas/plugins/fontawesome/css/all.min.css' %}">
+		
+		<!-- Main CSS -->
+		<link rel="stylesheet" href="{% static 'cas/css/style.css' %}">
+		
+
+
+
+		
+		{% block css %}
+		{% endblock %}
+
+</head>
+
+
+
+
+
+
+
+
+<body>
+
+
+    		<!-- Main Wrapper -->
+		<div class="main-wrapper">
+		
+			<!-- Header -->
+			<header class="header">
+				<nav class="navbar navbar-expand-lg header-nav">
+					<div class="navbar-header">
+						<a id="mobile_btn" href="javascript:void(0);">
+							<span class="bar-icon">
+								<span></span>
+								<span></span>
+								<span></span>
+							</span>
+						</a>
+						<a href="{% url 'index' %}" class="navbar-brand logo">
+							<img src="{% static 'cas/img/logo.png' %}" class="img-fluid" alt="Logo">
+						</a>
+					</div>
+					<div class="main-menu-wrapper">
+						<div class="menu-header">
+							<a href="{% url 'index' %}" class="menu-logo">
+								<img src="{% static 'cas/img/logo.png' %}" class="img-fluid" alt="Logo">
+							</a>
+							<a id="menu_close" class="menu-close" href="javascript:void(0);">
+								<i class="fas fa-times"></i>
+							</a>
+						</div>
+						<ul class="main-nav">
+ 
+							<li class="active"><a href="{% url 'doctor-dashboard' %}">Dashboard</a></li>
+ 
+
+	 
+ 
+						</ul>	 
+					</div>		 
+					<ul class="nav header-navbar-rht">
+						<!-- User Menu -->
+						<li class="nav-item dropdown has-arrow logged-item">
+							<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+								<span class="user-img">
+									<img class="rounded-circle" src="{{profile.image.url}}" width="31" alt="{{user.first_name}} {{user.last_name}}">
+								</span>
+							</a>
+							<div class="dropdown-menu dropdown-menu-right">
+								<div class="user-header">
+									<div class="avatar avatar-sm">
+										<img src="{{profile.image.url}}" alt="User Image" class="avatar-img rounded-circle">
+									</div>
+									<div class="user-text">
+										<h6>{{user.first_name}} {{user.last_name}}</h6>
+										<p class="text-muted mb-0">Doctor</p>
+									</div>
+								</div>
+								<a class="dropdown-item" href="{% url 'doctor-dashboard' %}">Dashboard</a>
+								<a class="dropdown-item" href="{% url 'doctor-profile-settings' %}">Profile Settings</a>
+								<a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+							</div>
+						</li>
+						<!-- /User Menu -->
+						
+					</ul>
+				</nav>
+			</header>
+			<!-- /Header -->
+			
+			<!-- Breadcrumb -->
+			<div class="breadcrumb-bar">
+				<div class="container-fluid">
+					<div class="row align-items-center">
+						<div class="col-md-12 col-12">
+							<nav aria-label="breadcrumb" class="page-breadcrumb">
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+									<li class="breadcrumb-item active" aria-current="page">{% block breadcrumb %}{% endblock %}</li>
+								</ol>
+							</nav>
+							<h2 class="breadcrumb-title">{% block breadcrumb1 %} {% endblock %}</h2>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /Breadcrumb -->
+			
+			<!-- Page Content -->
+			<div class="content">
+				<div class="container-fluid">
+
+					<div class="row">
+			 
+
+
+ 
+
+    <div class='mainBody'>
+        
+        <div class="currentConversations">
+            <div style="display: flex; margin-top: 15px;">
+                <label style="color: #123166;">New Conversation:</label>
+            </div>
+            <div style="display: flex; width: 100%;">
+                <input type="text" placeholder="Enter a Username" id="newConversationInputField" onkeyup="showSuggestions()" style="padding-left: 15px;">
+                <i class="fas fa-search" style="font-size: large; background-color: white; padding: 15px; color: rgb(204, 204, 204); cursor: pointer;"></i>
+            </div>
+
+            <div id="suggestionDiv" hidden>
+
+                {% for student in students %}    
+                    <div class="suggestion" id='{{student.username}} {{student.first_name}} {{student.last_name}}' onclick="addConversation(id)">
+                        {% if student.profile_pic %}
+                        <img src="{{student.profile_pic.url}}" style="width: 30px; height: 30px; border-radius: 50%; margin-top: 10px;">
+                        {% else %}
+                        <img src="/media/default.png" style="width: 30px; height: 30px; border-radius: 50%; margin-top: 10px;">
+                        {% endif %}
+                        <p style="margin-top: 10px; padding-left: 10px;"> {{student.username}} ({{student.first_name}} {{student.last_name}}) </p>
+                    </div>
+                    
+                {% endfor %}
+
+            </div>
+
+            <p style="color: #123166; margin-top: 20px; transition: 0.2s; font-weight: 400;">Messages:</p>
+
+            <!--Conversation-->
+            {% for c in conversations %}
+            <div class="conversationListItem" onclick="selectConversation('selectConversation:{{c.id}}')">
+                <div style="display: flex; width: 100%;">
+                    {% if request.user == c.user1 %}
+                        {% if c.user2.profile_pic %}
+                        <img src="{{c.user2.profile_pic.url}}" width="35px" height="35px"
+                            style="border-radius: 50%;">
+                        {% else %}
+                        <img src="/media/default.png" width="35px" height="35px"
+                            style="border-radius: 50%;">
+                        {% endif %}
+
+                        <p class="conversationPerson">{{c.user2.first_name}} {{ c.user2.last_name}}</p>
+
+                        {% if not c.readUser1 %}
+                            <i class="fas fa-envelope"
+                                style=" background-color: rgb(255, 75, 75); color: white; border-radius: 50%; height: 32px; width: 32px; padding: 8px; margin-left: 7px; transform: scale(0.7);"></i>
+                        {% endif %}
+                    {% else %}
+                        {% if c.user1.profile_pic %}
+                        <img src="{{c.user1.profile_pic.url}}" width="35px" height="35px"
+                            style="border-radius: 50%;">
+                        {% else %}
+                        <img src="/media/default.png" width="35px" height="35px"
+                            style="border-radius: 50%;">
+                        {% endif %}
+                        <p class="conversationPerson">{{c.user1.first_name}} {{ c.user1.last_name}}</p>
+
+                        {% if not c.readUser2 %}
+                            <i class="fas fa-envelope"
+                                style=" background-color: rgb(255, 75, 75); color: white; border-radius: 50%; height: 32px; width: 32px; padding: 8px; margin-left: 7px; transform: scale(0.7);"></i>                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+
+        <div class="textingView" >
+            
+            {% if conversations.count == 0 %}
+                <img src="{% static 'chat/Icons/VectorArtConversations.png' %}" style="width: 25vw;">
+                <h5 style="font-weight: 400; width: 50vh; text-align: center;">Easily communicate privately with other members!</h5>
+            {% endif %}
+
+            {% for c in conversations %}
+
+                {% if forloop.first %}
+                <div id="conversation:{{c.id}}" style="width: 100%;" class="entireConversation">
+                {% else %}
+                <div id="conversation:{{c.id}}" style="width: 100%;" hidden class="entireConversation">
+                {% endif %}
+                    <div class="textViewHeader">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col" style="display: flex; align-items: center; justify-content: flex-start; width: 25vw !important;">
+                                    {% if request.user == c.user1 %}
+                                    {% if c.user2.profile_pic %}
+                                    <img src="{{c.user2.profile_pic.url}}" width="45px" height="45px"
+                                        style="border-radius: 50%;">
+                                    {% else %}
+                                    <img src="/media/default.png" width="45px" height="45px"
+                                        style="border-radius: 50%;">
+                                    {% endif %}
+                            
+                                    <p class="conversationPerson" style="padding-top: 15px;">{{c.user2.first_name}} {{ c.user2.last_name}}</p>
+                                    {% else %}
+                                    {% if c.user1.profile_pic %}
+                                    <img src="{{c.user1.profile_pic.url}}" width="45px" height="45px"
+                                        style="border-radius: 50%;">
+                                    {% else %}
+                                    <img src="/media/default.png" width="45px" height="45px"
+                                        style="border-radius: 50%;">
+                                    {% endif %}
+                                    <p class="conversationPerson" style="padding-top: 15px;">{{c.user1.first_name}} {{ c.user1.last_name}}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col" style="display: flex; align-items: center; justify-content: flex-end;">
+                                    <button class="conversationDeleteButton" onclick="deleteConversation('{{c.id}}')"><i class="far fa-trash-alt"></i></button>
+                                </div>
+                            </div>
+                        </div>     
+                    </div>
+
+
+                    <div class="texts">
+                        {% for text in c.texts.all %}
+                            {% if text.sender == user %}
+                                <div class="SentText">
+                                    <p style="font-size: xx-small;">{{text.date}}</p>
+                                    {{text.text}}
+                                </div>
+                            {% else %}
+                                <div class="IncomingText">
+                                    <p style="font-size: xx-small;">{{text.date}}</p>
+                                    {{text.text}}
+                                </div>
+
+                            {% endif %}
+
+                        {% endfor %}
+                    </div>
+
+
+                    <div style="height: 9vh; display: flex; align-items: center; justify-content: center; width: 100%;">
+                        <div style="background-color: white; width: 90%; border-radius: 5px; display: flex;">
+                            <input type="text" class="newTextField" placeholder="message" id="messageField:{{c.id}}">
+                            <button style="background: white; font-size: large; outline: none; border:none; color:gray"><i
+                                    class="far fa-paper-plane" onclick="sendMessage('{{c.id}}')"></i></button>
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+            
+        </div>
+    </div>
+
+    <script src="{% static 'chat/Classroom.js' %}"></script>
+    <script src="{% static 'chat/index.js' %}"></script>
+    <script src="{% static 'chat/Conversations.js' %}"></script>
+
+
+</div>
+
+</div>
+
+</div>		
+<!-- /Page Content -->
+
+
+
+</div>
+<!-- /Main Wrapper -->
+{% block modal %}
+{% endblock %}
+
+<!-- jQuery -->
+<script src="{% static 'cas/js/jquery.min.js' %}"></script>
+
+<!-- Bootstrap Core JS -->
+<script src="{% static 'cas/js/popper.min.js' %}"></script>
+<script src="{% static 'cas/js/bootstrap.min.js' %}"></script>
+
+<!-- Sticky Sidebar JS -->
+<script src="{% static 'cas/plugins/theia-sticky-sidebar/ResizeSensor.js' %}"></script>
+<script src="{% static 'cas/plugins/theia-sticky-sidebar/theia-sticky-sidebar.js' %}"></script>
+
+{% block javascript %} {% endblock %}
+
+<!-- Custom JS -->
+<script src="{% static 'cas/js/script.js' %}"></script>
+
+</body>
+
+</html>

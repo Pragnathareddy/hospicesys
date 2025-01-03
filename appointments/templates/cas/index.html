@@ -1,0 +1,163 @@
+{% extends "cas/base.html" %}
+
+{% block title %} Home {% endblock %}
+
+{% load static %}
+
+{% block css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #00d0f1 0%, #2f80ed 100%);
+        padding: 80px 0;
+        position: relative;
+        overflow: hidden;
+        min-height: 600px;
+        display: flex;
+        align-items: center;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: url('{% static "cas/img/pattern.png" %}') repeat;
+        opacity: 0.1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-title {
+        color: #fff;
+        font-size: 3rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .hero-subtitle {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.25rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .search-container {
+        background: #fff;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .search-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .search-group {
+        flex: 1;
+    }
+
+    .search-input {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 5px;
+        padding: 12px 15px;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        background: #fff;
+        border-color: #20c0f3;
+        box-shadow: 0 0 0 3px rgba(32,192,243,0.1);
+    }
+
+    .search-hint {
+        color: #757575;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+
+    .search-button {
+        background: #20c0f3;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 12px 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .search-button:hover {
+        background: #0cb8eb;
+        transform: translateY(-1px);
+    }
+
+    .search-button i {
+        margin-right: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .search-row {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content text-center">
+            <h1 class="hero-title">Welcome to HospiceSYS </h1>
+            <p class="hero-subtitle">A platform that lets you discover the best doctors & specialists at the city nearest to you and book appointments.</p>
+            
+            <!-- Search Form -->
+            <div class="search-container">
+                <form action="{% url 'search-results' %}" method="GET">
+                    <div class="search-row">
+                        <div class="search-group">
+                            <input type="text" name="location" class="search-input" placeholder="Search Location">
+                            <span class="search-hint">Based on your Location</span>
+                        </div>
+                        <div class="search-group">
+                            <input type="text" name="search" class="search-input" placeholder="Search Doctors, Clinics, Hospitals, Diseases Etc">
+                            <span class="search-hint">Ex: Dental or Sugar Check up etc</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="search-button">
+                        <i class="fas fa-search"></i>
+                        <span>Find Healthcare</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascript %}
+<!-- Slick JS -->
+<script src="{% static 'cas/js/slick.js' %}"></script>
+<script src="{% static 'cas/js/ajax.js' %}"></script>
+{% endblock %}		
+		

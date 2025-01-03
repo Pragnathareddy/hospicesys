@@ -1,0 +1,340 @@
+{% extends 'cas/base.html' %}
+{% load static %}
+
+{% block title %}Chat{% endblock %}
+
+{% block css %}
+<style>
+    .chat-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        padding: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .chat-card:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .myGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .chat-link {
+        color: #272b41;
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    .chat-link:hover {
+        color: #20c0f3;
+        text-decoration: none;
+    }
+
+    .chat-subject {
+        color: #757575;
+        margin-top: 10px;
+        font-size: 14px;
+    }
+
+    .chat-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 15px;
+    }
+
+    .btn-chat {
+        background-color: #20c0f3;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        padding: 8px 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-chat:hover {
+        background-color: #1db9ea;
+    }
+
+    .btn-delete {
+        background-color: #ff0000;
+        margin-left: 10px;
+    }
+
+    .theme-selector {
+        display: flex;
+        gap: 10px;
+        margin: 15px 0;
+    }
+
+    .theme-option {
+        width: 30px;
+        height: 30px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .theme-blue { background-color: #20c0f3; }
+    .theme-green { background-color: #28a745; }
+    .theme-red { background-color: #dc3545; }
+    .theme-orange { background-color: #fd7e14; }
+    .theme-purple { background-color: #6f42c1; }
+    .theme-gray { background-color: #6c757d; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Chat Rooms</h4>
+                        {% if user.is_authenticated %}
+                        <button class="btn btn-primary float-right" onclick="newClass()">
+                            <i class="fas fa-plus"></i> New Chat Room
+                        </button>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div class="myGrid">
+                            {% for class in classes %}
+                            <div class="chat-card {{class.theme}}">
+                                <a href="{% url 'ViewClassroom' code=class.code %}" class="chat-link">
+                                    {{class.name}}
+                                </a>
+                                <p class="chat-subject">{{class.subject}}</p>
+                                <div class="chat-actions">
+                                    {% if user.userType == "Teacher" %}
+                                    <button id="{{class.id}}" class="btn btn-chat btn-delete" onclick="deleteClass('{{class.name}}',id)">
+                                        <i class="far fa-trash-alt"></i> Delete
+                                    </button>
+                                    {% endif %}
+                                    {% if user.userType == "Student" %}
+                                    <button id="{{class.code}}" class="btn btn-chat" onclick="leave(id)">
+                                        <i class="fas fa-sign-out-alt"></i> Leave
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Join Class Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% if user.userType == "Teacher" %}Create Chat Room{% else %}Join Chat Room{% endif %}</h5>
+                <button type="button" class="close" onclick="newClass()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {% if user.userType == "Teacher" %}
+                <div class="form-group">
+                    <input type="text" class="form-control" id="class_name_field" placeholder="Name of Chat Room">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="class_subject_field" placeholder="Description">
+                </div>
+                <div class="form-group">
+                    <label>Theme:</label>
+                    <div class="theme-selector">
+                        <input type="radio" name="colorSelect" value="cardBlue" id="cardBlue" class="d-none">
+                        <label for="cardBlue" class="theme-option theme-blue"></label>
+                        
+                        <input type="radio" name="colorSelect" value="cardGreen" id="cardGreen" class="d-none">
+                        <label for="cardGreen" class="theme-option theme-green"></label>
+                        
+                        <input type="radio" name="colorSelect" value="cardRed" id="cardRed" class="d-none">
+                        <label for="cardRed" class="theme-option theme-red"></label>
+                        
+                        <input type="radio" name="colorSelect" value="cardOrange" id="cardOrange" class="d-none">
+                        <label for="cardOrange" class="theme-option theme-orange"></label>
+                        
+                        <input type="radio" name="colorSelect" value="cardPurple" id="cardPurple" class="d-none">
+                        <label for="cardPurple" class="theme-option theme-purple"></label>
+                        
+                        <input type="radio" name="colorSelect" value="cardGray" id="cardGrey" class="d-none">
+                        <label for="cardGrey" class="theme-option theme-gray"></label>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary btn-block" onclick="createClass(document.getElementById('class_name_field').value, document.getElementById('class_subject_field').value)">
+                    Create Chat Room
+                </button>
+                {% else %}
+                <div class="form-group">
+                    <input type="text" class="form-control" id="class_code_field" placeholder="Enter Chat Room Code">
+                </div>
+                <p class="text-danger d-none" id="notValidCode">Code is not valid!</p>
+                <button type="button" class="btn btn-primary btn-block" onclick="joinClass(document.getElementById('class_code_field').value)">
+                    Join Chat Room
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Confirmation Modal -->
+<div class="modal fade" id="leaveModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Leave Chat Room</h5>
+                <button type="button" class="close" onclick="leave()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to leave this chat room?</p>
+                <div class="text-right">
+                    <button type="button" class="btn btn-secondary" onclick="leave()">No</button>
+                    <button type="button" class="btn btn-danger" onclick="leaveClass()">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+function newClass() {
+    $('#chatModal').modal('toggle');
+}
+
+function leave(code) {
+    if (code) {
+        window.leaveCode = code;
+    }
+    $('#leaveModal').modal('toggle');
+}
+
+function createClass(name, subject) {
+    if (!name || !subject) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    const theme = document.querySelector('input[name="colorSelect"]:checked')?.value || 'cardBlue';
+    
+    fetch('{% url "create-class" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            name: name,
+            subject: subject,
+            theme: theme
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.message === 'success') {
+            location.reload();
+        }
+    });
+}
+
+function joinClass(code) {
+    if (!code) {
+        alert('Please enter a code');
+        return;
+    }
+    
+    fetch('{% url "join-class" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            code: code
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.message === 'success') {
+            location.reload();
+        } else {
+            document.getElementById('notValidCode').classList.remove('d-none');
+        }
+    });
+}
+
+function leaveClass() {
+    if (!window.leaveCode) return;
+    
+    fetch('{% url "leave-class" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            code: window.leaveCode
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.message === 'success') {
+            location.reload();
+        }
+    });
+}
+
+function deleteClass(name, id) {
+    if (confirm(`Are you sure you want to delete ${name}?`)) {
+        fetch('{% url "delete-class" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                id: id
+            })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.message === 'success') {
+                location.reload();
+            }
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends "doctors/base.html" %}
+
+{% block title %}Invoices{% endblock %}
+
+{% load static %}
+
+{% block breadcrumb %}Invoices{% endblock %}
+{% block breadcrumb1 %}Invoices{% endblock %}
+
+{% block sidenav %}
+	<ul>
+		<li>
+			<a href="{% url 'doctor-dashboard' %}">
+				<i class="fas fa-columns"></i>
+				<span>Dashboard</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'appointments' %}">
+				<i class="fas fa-calendar-check"></i>
+				<span>Appointments</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'my-patients' %}">
+				<i class="fas fa-user-injured"></i>
+				<span>My Patients</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'schedule-timings' %}">
+				<i class="fas fa-hourglass-start"></i>
+				<span>Schedule Timings</span>
+			</a>
+		</li>
+		<li class="active">
+			<a href="{% url 'invoices' %}">
+				<i class="fas fa-file-invoice"></i>
+				<span>Invoices</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'reviews' %}">
+				<i class="fas fa-star"></i>
+				<span>Reviews</span>
+			</a>
+		</li>
+ 
+		<li>
+			<a href="{% url 'doctor-profile-settings' %}">
+				<i class="fas fa-user-cog"></i>
+				<span>Profile Settings</span>
+			</a>
+		</li>
+ 
+		<li>
+			<a href="{% url 'doctor-change-password' %}">
+				<i class="fas fa-lock"></i>
+				<span>Change Password</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'logout' %}">
+				<i class="fas fa-sign-out-alt"></i>
+				<span>Logout</span>
+			</a>
+		</li>
+	</ul>
+{% endblock %}
+
+{% block content %}		
+
+	<div class="col-md-7 col-lg-8 col-xl-9">
+		<div class="card card-table">
+			<div class="card-body">
+			
+				<!-- Invoice Table -->
+				<div class="table-responsive">
+					<table class="table table-hover table-center mb-0">
+						<thead>
+							<tr>
+								<th>Invoice No</th>
+								<th>Patient</th>
+								<th>Amount</th>
+								<th>Paid On</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+						{% for invoice in invoices %}
+							<tr>
+								<td>
+									<a href="{% url 'invoice' invoice.patient|slugify invoice.id %}">#INV-000{{invoice.id}}</a>
+								</td>
+								<td>
+									<h2 class="table-avatar">
+										<a href="{% url 'patient-profile' invoice.patient|slugify invoice.patient.id %}" class="avatar avatar-sm mr-2">
+											<img class="avatar-img rounded-circle" src="{{invoice.patient.image.url}}" alt="User Image">
+										</a>
+										<a href="{% url 'patient-profile' invoice.patient|slugify invoice.patient.id %}">{{invoice.patient.first_name}} {{invoice.patient.second_name}} <span>#PT000{{invoice.id}}</span></a>
+									</h2>
+								</td>
+								<td>$ {{invoice.total_amount}}</td>
+								<td>{{invoice.date_paid}}</td>
+								<td class="text-right">
+									<div class="table-action">
+										<a href="{% url 'invoice' invoice.patient|slugify invoice.id %}" class="btn btn-sm bg-info-light">
+											<i class="far fa-eye"></i> View
+										</a>
+ 
+									</div>
+								</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				</div>
+				<!-- /Invoice Table -->
+				
+			</div>
+		</div>
+	</div>
+{% endblock %}

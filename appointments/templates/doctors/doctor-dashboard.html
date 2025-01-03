@@ -1,0 +1,390 @@
+{% extends "doctors/base.html" %}
+
+{% block title %}Doctors{% endblock %}
+
+{% load static %}
+
+{% block breadcrumb %}Dashboard{% endblock %}
+{% block breadcrumb1 %}Dashboard{% endblock %}
+
+{% block sidenav %}
+<ul>
+	<li class="active">
+		<a href="{% url 'doctor-dashboard' %}">
+			<i class="fas fa-columns"></i>
+			<span>Dashboard</span>
+		</a>
+	</li>
+	<li>
+		<a href="{% url 'appointments' %}">
+			<i class="fas fa-calendar-check"></i>
+			<span>Appointments</span>
+		</a>
+	</li>
+	<li>
+		<a href="{% url 'my-patients' %}">
+			<i class="fas fa-user-injured"></i>
+			<span>My Patients</span>
+		</a>
+	</li>
+	<li>
+		<a href="{% url 'schedule-timings' %}">
+			<i class="fas fa-hourglass-start"></i>
+			<span>Schedule Timings</span>
+		</a>
+	</li>
+	<li>
+		<a href="{% url 'invoices' %}">
+			<i class="fas fa-file-invoice"></i>
+			<span>Invoices</span>
+		</a>
+	</li>
+	<li>
+		<a href="{% url 'reviews' %}">
+			<i class="fas fa-star"></i>
+			<span>Reviews</span>
+		</a>
+	</li>
+ 
+	<li>
+		<a href="{% url 'doctor-profile-settings' %}">
+			<i class="fas fa-user-cog"></i>
+			<span>Profile Settings</span>
+		</a>
+	</li>
+ 
+	<li>
+		<a href="{% url 'doctor-change-password' %}">
+			<i class="fas fa-lock"></i>
+			<span>Change Password</span>
+		</a>
+	</li>
+	<li>
+		<a href="{% url 'logout' %}">
+			<i class="fas fa-sign-out-alt"></i>
+			<span>Logout</span>
+		</a>
+	</li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="col-md-7 col-lg-8 col-xl-9">
+
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card dash-card">
+				<div class="card-body">
+					<div class="row">
+						<div class="col-md-12 col-lg-4">
+							<div class="dash-widget dct-border-rht">
+								<div class="circle-bar circle-bar1">
+									<div class="circle-graph1" data-percent="75">
+										<img src="{% static 'cas/img/icon-01.png' %}" class="img-fluid" alt="patient">
+									</div>
+								</div>
+								<div class="dash-widget-info">
+									<h6>Total Patient</h6>
+									<h3>{{total_patients}}</h3>
+									<p class="text-muted">Till Today</p>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-md-12 col-lg-4">
+							<div class="dash-widget dct-border-rht">
+								<div class="circle-bar circle-bar2">
+									<div class="circle-graph2" data-percent="65">
+										<img src="{% static 'cas/img/icon-02.png' %}" class="img-fluid" alt="Patient">
+									</div>
+								</div>
+								<div class="dash-widget-info">
+									<h6>Today Patient</h6>
+									<h3>{{today_appointments.count}}</h3>
+									<p class="text-muted">{% now "DATE_FORMAT" %}</p>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-md-12 col-lg-4">
+							<div class="dash-widget">
+								<div class="circle-bar circle-bar3">
+									<div class="circle-graph3" data-percent="50">
+										<img src="{% static 'cas/img/icon-03.png' %}" class="img-fluid" alt="Patient">
+									</div>
+								</div>
+								<div class="dash-widget-info">
+									<h6>Appoinments</h6>
+									<h3>{{appointments.count}}</h3>
+									<p class="text-muted">{% now "DATE_FORMAT" %}</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-md-12">
+			<h4 class="mb-4">Patient Appoinment</h4>
+			<div class="appointment-tab">
+			
+				<!-- Appointment Tab -->
+				<ul class="nav nav-tabs nav-tabs-solid nav-tabs-rounded">
+					<li class="nav-item">
+						<a class="nav-link active" href="#upcoming-appointments" data-toggle="tab">Upcoming</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#today-appointments" data-toggle="tab">Today</a>
+					</li> 
+				</ul>
+				<!-- /Appointment Tab -->
+				
+				<div class="tab-content">
+				
+					<!-- Upcoming Appointment Tab -->
+					<div class="tab-pane show active" id="upcoming-appointments">
+						<div class="card card-table mb-0">
+							<div class="card-body">
+								<div class="table-responsive">
+									<table class="table table-hover table-center mb-0">
+										<thead>
+											<tr>
+												<th>Patient Name</th>
+												<th>Appt Date</th>
+												<th>Purpose</th>
+												<th>Type</th>
+												<th class="text-center">Paid Amount</th>
+												<th></th>
+											</tr>
+										</thead>
+										<tbody>
+										{% for appointment in upcoming_appointments %}
+											<tr>
+												<td>
+													<h2 class="table-avatar">
+														<a href="{% url 'patient-profile' appointment.patient|slugify appointment.patient.id %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{{appointment.patient.image.url}}" alt="User Image"></a>
+														<a href="{% url 'patient-profile' appointment.patient|slugify appointment.patient.id %}">{{appointment.patient.first_name}} {{appointment.patient.second_name}} <span>#PT000{{appointment.patient.id}}</span></a>
+													</h2>
+												</td>
+												<td>{{appointment.booking_date.date}} <span class="d-block text-info">{{appointment.booking_date.time}}</span></td>
+												<td>{{appointment.purpose}}</td>
+												<td>{{appointment.new_patient}}</td>
+												<td class="text-center">$ {{appointment.amount}}</td>
+												<td class="text-right">
+													<div class="table-action">
+														<a href="javascript:void(0);" class="btn btn-sm bg-info-light" data-toggle="modal" data-target="#appt{{appointment.id}}_details">
+															<i class="far fa-eye"></i> View
+														</a>
+													{% if appointment.status == 'WAIT' %}
+														<a href="{% url 'appointment-accept' appointment.purpose|slugify appointment.id %}" class="btn btn-sm bg-success-light ajax-link">
+															<i class="fas fa-check"></i> Accept
+														</a>
+														<a href="{% url 'appointment-cancel' appointment.purpose|slugify appointment.id %}" class="btn btn-sm bg-danger-light ajax-link">
+															<i class="fas fa-times"></i> Cancel
+														</a>
+													{% endif %}
+													</div>
+												</td>
+											</tr>
+										{% endfor %}
+										</tbody>
+									</table>		
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- /Upcoming Appointment Tab -->
+			   
+					<!-- Today Appointment Tab -->
+					<div class="tab-pane" id="today-appointments">
+						<div class="card card-table mb-0">
+							<div class="card-body">
+								<div class="table-responsive">
+									<table class="table table-hover table-center mb-0">
+										<thead>
+											<tr>
+												<th>Patient Name</th>
+												<th>Appt Date</th>
+												<th>Purpose</th>
+												<th>Type</th>
+												<th class="text-center">Paid Amount</th>
+												<th></th>
+											</tr>
+										</thead>
+										<tbody>
+										{% for appointment in today_appointments %}
+											<tr>
+												<td>
+													<h2 class="table-avatar">
+														<a href="{% url 'patient-profile' appointment.patient|slugify appointment.patient.id %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="{{appointment.patient.image.url}}" alt="User Image"></a>
+														<a href="{% url 'patient-profile' appointment.patient|slugify appointment.patient.id %}">{{appointment.patient.first_name}} {{appointment.patient.second_name}} <span>#PT000{{appointment.patient.id}}</span></a>
+													</h2>
+												</td>
+												<td>{{appointment.booking_date.time}} <span class="d-block text-info">{{appointment.booking_date.time}}</span></td>
+												<td>{{appointment.purpose}}</td>
+												<td>{{appointment.new_patient}}</td>
+												<td class="text-center">$ {{appointment.amount}}</td>
+												<td class="text-right">
+													<div class="table-action">
+														<a href="javascript:void(0);" class="btn btn-sm bg-info-light" data-toggle="modal" data-target="#appt{{appointment.id}}_details">
+															<i class="far fa-eye"></i> View
+														</a>
+													{% if appointment.status == 'WAIT' %}
+														<a href="{% url 'appointment-accept' appointment.purpose|slugify appointment.id %}" class="btn btn-sm bg-success-light ajax-link">
+															<i class="fas fa-check"></i> Accept
+														</a>
+														<a href="{% url 'appointment-cancel' appointment.purpose|slugify appointment.id %}" class="btn btn-sm bg-danger-light ajax-link">
+															<i class="fas fa-times"></i> Cancel
+														</a>
+													{% elif appointment.status == 'ACCEPTED' %}
+														<a href="{% url 'appointment-complete' appointment.purpose|slugify appointment.id %}" class="btn btn-sm bg-primary-light ajax-link">
+															<i class="fas fa-check-double"></i> Complete
+														</a>
+													{% endif %}
+													</div>
+												</td>
+											</tr>
+										{% endfor %}
+										</tbody>
+									</table>		
+								</div>	
+							</div>	
+						</div>	
+					</div>
+					<!-- /Today Appointment Tab -->
+					
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+{% endblock %}
+
+{% block modal %}
+	{% for appointment in upcoming_appointments %}
+	<!-- Appointment Details Modal -->
+	<div class="modal fade custom-modal" id="appt{{appointment.id}}_details">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Appointment Details</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<ul class="info-details">
+						<li>
+							<div class="details-header">
+								<div class="row">
+									<div class="col-md-6">
+										<span class="title">#APT000{{appointment.id}}</span>
+										<span class="text">{{appointment.booking_date}}</span>
+									</div>
+									<div class="col-md-6">
+										<div class="text-right">
+										{% if appointment.status == 'ACCEPTED' %}
+											<button type="button" class="btn bg-info-light btn-sm" id="topup_status">Accepted</button>
+										{% elif appointment.status == 'WAIT' %}
+											<button type="button" class="btn bg-warning-light btn-sm" id="topup_status">pending</button>
+										{% elif appointment.status == 'CANCELLED' %}
+											<button type="button" class="btn bg-danger-light btn-sm" id="topup_status">Cancelled</button>
+										{% elif appointment.status == 'COMPLETED' %}
+											<button type="button" class="btn bg-success-light btn-sm" id="topup_status">Completed</button>
+										{% endif %}
+										</div>
+									</div>
+								</div>
+							</div>
+						</li>
+						<li>
+							<span class="title">Status:</span>
+							<span class="text">{{appointment.status}}</span>
+						</li>
+						<li>
+							<span class="title">Confirm Date:</span>
+							<span class="text">{{appointment.date.date}}</span>
+						</li>
+						<li>
+							<span class="title">Paid Amount</span>
+							<span class="text">$ {{appointment.amount}}</span>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /Appointment Details Modal -->
+	{% endfor %}
+
+	{% for appointment in today_appointments %}
+	<!-- Appointment Details Modal -->
+	<div class="modal fade custom-modal" id="appt{{appointment.id}}_details">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Appointment Details</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<ul class="info-details">
+						<li>
+							<div class="details-header">
+								<div class="row">
+									<div class="col-md-6">
+										<span class="title">#APT000{{appointment.id}}</span>
+										<span class="text">{{appointment.booking_date}}</span>
+									</div>
+									<div class="col-md-6">
+										<div class="text-right">
+										{% if appointment.status == 'ACCEPTED' %}
+											<button type="button" class="btn bg-info-light btn-sm" id="topup_status">Accepted</button>
+										{% elif appointment.status == 'WAIT' %}
+											<button type="button" class="btn bg-warning-light btn-sm" id="topup_status">pending</button>
+										{% elif appointment.status == 'CANCELLED' %}
+											<button type="button" class="btn bg-danger-light btn-sm" id="topup_status">Cancelled</button>
+										{% elif appointment.status == 'COMPLETED' %}
+											<button type="button" class="btn bg-success-light btn-sm" id="topup_status">Completed</button>
+										{% endif %}
+										</div>
+									</div>
+								</div>
+							</div>
+						</li>
+						<li>
+							<span class="title">Status:</span>
+							<span class="text">{{appointment.status}}</span>
+						</li>
+						<li>
+							<span class="title">Confirm Date:</span>
+							<span class="text">{{appointment.date.date}}</span>
+						</li>
+						<li>
+							<span class="title">Paid Amount</span>
+							<span class="text">$ {{appointment.amount}}</span>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /Appointment Details Modal -->
+	{% endfor %}
+
+{% endblock %}	 
+
+{% block javascript %}
+	<!-- Circle Progress JS -->
+	<script src="{% static 'cas/js/circle-progress.min.js' %}"></script>
+
+	<!-- Custom JS -->
+	<script src="{% static 'cas/js/ajax.js' %}"></script>
+{% endblock %}
+	  
+		

@@ -1,0 +1,588 @@
+{% extends "cas/base.html" %}
+
+{% block title %} {{doctor.first_name}} {{doctor.second_name}} Profile{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+
+	<!-- Page Content -->
+	<div class="content">
+		<div class="container">
+
+			<!-- Doctor Widget -->
+			<div class="card">
+				<div class="card-body">
+					<div class="doctor-widget">
+						<div class="doc-info-left">
+							<div class="doctor-img">
+								<img src="{{doctor.image.url}}" class="img-fluid" alt="User Image">
+							</div>
+							<div class="doc-info-cont">
+								<h4 class="doc-name">{{doctor.full_name}}</h4>
+								<p class="doc-speciality">{{doctor.latest_degree}}</p>
+								<p class="doc-department"><img src="{{doctor.speciality.image.url}}" class="img-fluid" alt="S">{{doctor.speciality.name}}</p>
+								<div class="rating">
+								{% for x, filled in doctor.review.items %}	
+									<i class="fas fa-star {{filled}}"></i>
+								{% endfor %}
+									<span class="d-inline-block average-rating">({{doctor.total_reviews}})</span>
+								</div>
+								<div class="clinic-details">
+									<p class="doc-location"><i class="fas fa-map-marker-alt"></i> {{doctor.county}}, {{doctor.country}} </p>
+									<!-- ul class="clinic-gallery">
+										<li>
+											<a href="{% static 'cas/img/features/feature-01.jpg' %}" data-fancybox="gallery">
+												<img src="{% static 'cas/img/features/feature-01.jpg' %}" alt="Feature">
+											</a>
+										</li>
+										<li>
+											<a href="{% static 'cas/img/features/feature-02.jpg' %}" data-fancybox="gallery">
+												<img  src="{% static 'cas/img/features/feature-02.jpg' %}" alt="Feature Image">
+											</a>
+										</li>
+										<li>
+											<a href="{% static 'cas/img/features/feature-03.jpg' %}" data-fancybox="gallery">
+												<img src="{% static 'cas/img/features/feature-03.jpg' %}" alt="Feature">
+											</a>
+										</li>
+										<li>
+											<a href="{% static 'cas/img/features/feature-04.jpg' %}" data-fancybox="gallery">
+												<img src="{% static 'cas/img/features/feature-04.jpg' %}" alt="Feature">
+											</a>
+										</li>
+									</ul-->
+								</div>
+								<div class="clinic-services">
+								{% for x in doctor.service_list %}
+									<span>{{x}}</span>
+								{% endfor %}
+								</div>
+							</div>
+						</div>
+						<div class="doc-info-right">
+							<div class="clini-infos">
+								<ul>
+									<li><i class="far fa-thumbs-up"></i> {{doctor.thumbs}}%</li>
+									<li><i class="far fa-comment"></i> {{doctor.total_reviews}} Feedback</li>
+									<li><i class="fas fa-map-marker-alt"></i> {{doctor.county}}, {{doctor.country}}</li>
+									<li><i class="far fa-money-bill-alt"></i> $ {{doctor.pricing}} per session </li>
+								</ul>
+							</div>
+						{% if user.groups.get.name == 'patients_group' %}
+							<div class="doctor-action">
+								<a href="{% url 'favourite-doctor' doctor.full_name|slugify doctor.id %}" class="btn btn-white fav-btn">
+									<i class="far fa-bookmark"></i>
+								</a>
+ 
+ 
+							</div>
+							<div class="clinic-booking">
+								<a class="apt-btn" href="{% url 'booking' doctor.full_name|slugify doctor.id %}">Book Appointment</a>
+							</div>
+						{% elif user.groups.get.name == 'doctors_group' %}
+
+							{% if doctor.id == profile.id %}
+							<div class="clinic-booking">
+								<a class="apt-btn" href="{% url 'doctor-profile-settings' %}">Edit Profile</a>
+							</div>
+							{% endif %}
+						{% elif user.is_superuser %}
+
+						{% else %}
+							<div class="clinic-booking">
+								<a class="apt-btn" href="{% url 'booking' doctor.full_name|slugify doctor.id %}">Book Appointment</a>
+							</div>
+						{% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /Doctor Widget -->
+			
+			<!-- Doctor Details Tab -->
+			<div class="card">
+				<div class="card-body pt-0">
+				
+					<!-- Tab Menu -->
+					<nav class="user-tabs mb-4">
+						<ul class="nav nav-tabs nav-tabs-bottom nav-justified">
+							<li class="nav-item">
+								<a class="nav-link active" href="#doc_overview" data-toggle="tab">Overview</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="#doc_locations" data-toggle="tab">Locations</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="#doc_reviews" data-toggle="tab">Reviews</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="#doc_business_hours" data-toggle="tab">Business Hours</a>
+							</li>
+						</ul>
+					</nav>
+					<!-- /Tab Menu -->
+					
+					<!-- Tab Content -->
+					<div class="tab-content pt-0">
+					
+						<!-- Overview Content -->
+						<div role="tabpanel" id="doc_overview" class="tab-pane fade show active">
+							<div class="row">
+								<div class="col-md-12 col-lg-9">
+								
+									<!-- About Details -->
+									<div class="widget about-widget">
+										<h4 class="widget-title">About Me</h4>
+										<p>{{doctor.biography}}</p>
+									</div>
+									<!-- /About Details -->
+								
+									<!-- Education Details -->
+									<div class="widget education-widget">
+										<h4 class="widget-title">Education</h4>
+										<div class="experience-box">
+											<ul class="experience-list">
+											{% for edu in education %}
+												<li>
+													<div class="experience-user">
+														<div class="before-circle"></div>
+													</div>
+													<div class="experience-content">
+														<div class="timeline-content">
+															<a href="#/" class="name">{{edu.institute}}</a>
+															<div>{{edu.degree}}</div>
+															<span class="time">{{edu.y_o_c|date:"M Y"}}</span>
+														</div>
+													</div>
+												</li>
+											{% endfor %}
+											</ul>
+										</div>
+									</div>
+									<!-- /Education Details -->
+							
+									
+									<!-- Services List -->
+									<div class="service-list">
+										<h4>Services</h4>
+										<ul class="clearfix">
+										{% for service in doctor.service_list %}	
+											<li>{{service}}</li>
+										{% endfor %}
+										</ul>
+									</div>
+									<!-- /Services List -->
+									
+									<!-- Specializations List -->
+									<div class="service-list">
+										<h4>Specializations</h4>
+										<ul class="clearfix">
+										{% for specialization in doctor.specialization_list %}
+											<li>{{specialization}}</li>
+										{% endfor %}
+										</ul>
+									</div>
+									<!-- /Specializations List -->
+
+								</div>
+							</div>
+						</div>
+						<!-- /Overview Content -->
+						
+						<!-- Locations Content -->
+						<div role="tabpanel" id="doc_locations" class="tab-pane fade">
+						
+							<!-- Location List -->
+							<div class="location-list">
+								<div class="row">
+								
+									<!-- Clinic Content -->
+									<div class="col-md-6">
+										<div class="clinic-content">
+											<h4 class="clinic-name"><a href="#">{{doctor.drclinic.name}}</a></h4>
+											<!--
+											<p class="doc-speciality">MDS - Periodontology and Oral Implantology, BDS</p>
+											<div class="rating">
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star filled"></i>
+												<i class="fas fa-star"></i>
+												<span class="d-inline-block average-rating">(4)</span>
+											</div>
+											-->
+											<div class="clinic-details mb-0">
+												<h5 class="clinic-direction"> <i class="fas fa-map-marker-alt"></i> {{doctor.drclinic.address}} <br></h5>
+												<!-- ul>
+													<li>
+														<a href="{% static 'cas/img/features/feature-01.jpg' %}" data-fancybox="gallery2">
+															<img src="{% static 'cas/img/features/feature-01.jpg' %}" alt="Feature Image">
+														</a>
+													</li>
+													<li>
+														<a href="{% static 'cas/img/features/feature-02.jpg' %}" data-fancybox="gallery2">
+															<img src="{% static 'cas/img/features/feature-02.jpg' %}" alt="Feature Image">
+														</a>
+													</li>
+													<li>
+														<a href="{% static 'cas/img/features/feature-03.jpg' %}" data-fancybox="gallery2">
+															<img src="{% static 'cas/img/features/feature-03.jpg' %}" alt="Feature Image">
+														</a>
+													</li>
+													<li>
+														<a href="{% static 'cas/img/features/feature-04.jpg' %}" data-fancybox="gallery2">
+															<img src="{% static 'cas/img/features/feature-04.jpg' %}" alt="Feature Image">
+														</a>
+													</li>
+												</ul -->
+											</div>
+										</div>
+									</div>
+									<!-- /Clinic Content -->
+									
+									<!-- Clinic Timing -->
+									<!-- div class="col-md-4">
+										<div class="clinic-timing">
+											<div>
+												<p class="timings-days">
+													<span> Mon - Sat </span>
+												</p>
+												<p class="timings-times">
+													<span>10:00 AM - 2:00 PM</span>
+													<span>4:00 PM - 9:00 PM</span>
+												</p>
+											</div>
+											<div>
+											<p class="timings-days">
+												<span>Sun</span>
+											</p>
+											<p class="timings-times">
+												<span>10:00 AM - 2:00 PM</span>
+											</p>
+											</div>
+										</div>
+									</div -->
+									<!-- /Clinic Timing -->
+									
+									<!-- div class="col-md-2">
+										<div class="consult-price">
+											$250
+										</div>
+									</div -->
+								</div>
+							</div>
+							<!-- /Location List -->
+						</div>
+						<!-- /Locations Content -->
+						
+						<!-- Reviews Content -->
+						<div role="tabpanel" id="doc_reviews" class="tab-pane fade">
+						
+							<!-- Review Listing -->
+							<div class="widget review-listing">
+								<ul class="comments-list">
+								{% for review in reviews %}
+									<!-- Comment List -->
+									<li>
+										<div class="comment">
+											<img class="avatar avatar-sm rounded-circle" alt="User Image" src="{{review.appointment.patient.image.url}}">
+											<div class="comment-body">
+												<div class="meta-data">
+													<span class="comment-author">{{review.appointment.patient}}</span>
+													<span class="comment-date">Reviewed {{ review.date|timesince }} ago</span>
+													<div class="review-count rating">
+													{% for rate in review.review_rate.values %}
+														<i class="fas fa-star {{rate}}"></i>
+													{% endfor %}
+													</div>
+												</div>
+												{% if review.recommend %}
+													<p class="recommended">
+														<i class="far fa-thumbs-up"></i> I recommend the doctor
+													</p>
+												{% elif review.recommend == False %}
+													<p class="recommended" style="color: red;">
+														<i class="far fa-thumbs-down"></i> I do not recommend the doctor
+													</p>
+												{% endif %}
+												<p class="comment-content">
+													{{review.text}}
+												</p>
+											
+											
+												<div class="comment-reply">
+													<a class="comment-btn" href="#" data-toggle="modal" data-target="#add_reply_{{review.id}}">
+														<i class="fas fa-reply"></i> Reply
+													</a>
+												   	<p class="recommend-btn">
+												{% if user.groups.get.name == 'patients_group' %}
+													{% if review.patient_liked == None %}
+														<a href="{% url 'like-review' review.id %}" class="like-btn ajax-link">
+															<i class="far fa-thumbs-up"></i> Yes({{review.total_likes}})
+														</a>
+														<a href="{% url 'dislike-review' review.id %}" class="dislike-btn ajax-link">
+															<i class="far fa-thumbs-down"></i> No({{review.total_dislikes}})
+														</a>
+													{% elif review.patient_liked %}
+														<a href="{% url 'like-review' review.id %}" class="like-btn ajax-link" style="color: green;">
+															<i class="far fa-thumbs-up"></i> Yes({{review.total_likes}})
+														</a>
+														<a href="{% url 'dislike-review' review.id %}" class="dislike-btn ajax-link">
+															<i class="far fa-thumbs-down"></i> No({{review.total_dislikes}})
+														</a>
+													{% elif not review.patient_liked %}
+														<a href="{% url 'like-review' review.id %}" class="like-btn ajax-link">
+															<i class="far fa-thumbs-up"></i> Yes({{review.total_likes}})
+														</a>
+														<a href="{% url 'dislike-review' review.id %}" class="dislike-btn ajax-link" style="color: red;">
+															<i class="far fa-thumbs-down"></i> No({{review.total_dislikes}})
+														</a>
+													{% endif %}
+												{% elif user.groups.get.name == 'doctors_group' %}
+													{% if review.doctor_liked == None %}
+														<a href="{% url 'like-review' review.id %}" class="like-btn ajax-link">
+															<i class="far fa-thumbs-up"></i> Yes({{review.total_likes}})
+														</a>
+														<a href="{% url 'dislike-review' review.id %}" class="dislike-btn ajax-link">
+															<i class="far fa-thumbs-down"></i> No({{review.total_dislikes}})
+														</a>
+													{% elif review.doctor_liked %}
+														<a href="{% url 'like-review' review.id %}" class="like-btn ajax-link" style="color: green;">
+															<i class="far fa-thumbs-up"></i> Yes({{review.total_likes}})
+														</a>
+														<a href="{% url 'dislike-review' review.id %}" class="dislike-btn ajax-link">
+															<i class="far fa-thumbs-down"></i> No({{review.total_dislikes}})
+														</a>
+													{% elif not review.doctor_liked %}
+														<a href="{% url 'like-review' review.id %}" class="like-btn ajax-link">
+															<i class="far fa-thumbs-up"></i> Yes({{review.total_likes}})
+														</a>
+														<a href="{% url 'dislike-review' review.id %}" class="dislike-btn ajax-link" style="color: red;">
+															<i class="far fa-thumbs-down"></i> No({{review.total_dislikes}})
+														</a>
+													{% endif %}
+												{% else %}
+													<a href="javascript:void(0);" class="like-btn">
+														<i class="far fa-thumbs-up"></i> Yes({{review.total_likes}})
+													</a>
+													<a href="javascript:void(0);" class="dislike-btn">
+														<i class="far fa-thumbs-down"></i> No({{review.total_dislikes}})
+													</a>
+												{% endif %}
+													</p>
+												</div>
+											
+											</div>
+										</div>
+										
+										<!-- Comment Reply -->
+										<ul class="comments-reply">
+										{% for reply in review.replies %}
+											<li>
+												<div class="comment">
+													<img class="avatar avatar-sm rounded-circle" alt="User Image" src="{{reply.get_user.image.url}}">
+													<div class="comment-body">
+														<div class="meta-data">
+															<span class="comment-author">{{reply.get_user.title}} {{reply.get_user.first_name}} {{reply.get_user.second_name}}</span>
+															<span class="comment-date">Reviewed {{reply.date|timesince}} ago</span>
+														</div>
+														<p class="comment-content">
+															{{reply.text}}
+														</p>
+													</div>
+												</div>
+											</li>
+										{% endfor %}
+										</ul>
+										<!-- /Comment Reply -->
+										
+									</li>
+									<!-- /Comment List -->
+								{% endfor %}
+								</ul>
+								{% if reviews.count > 0 %}
+								<!-- Show All -->
+								<div class="all-feedback text-center">
+									<a href="#" class="btn btn-primary btn-sm">
+										Show all feedback <strong>({{doctor.total_reviews}})</strong>
+									</a>
+								</div>
+								<!-- /Show All -->
+								{% else %}
+								<div class="all-feedback text-center">
+									<a href="#" class="btn btn-primary btn-sm">
+										No reviews yet for {{doctor.full_name}}<strong>(0)</strong>
+									</a>
+								</div>
+								{% endif %}
+								
+							</div>
+							<!-- /Review Listing -->
+						{% if user.groups.get.name == 'patients_group' %}
+							<!-- Write Review -->
+							<div class="write-review">
+							{% if profile.id in doctor.my_patient_id %}
+								<h4>Write a review for <strong>{{doctor.full_name}}</strong></h4>
+								
+								<!-- Write Review Form -->
+								<form class="add-form" action="{% url 'add-review' %}" method="POST">
+									{% csrf_token %}
+									<div class="form-group">
+										<label>Review</label>
+										<div class="star-rating">
+											<input id="star-5" type="radio" name="rating" value="5" required>
+											<label for="star-5" title="5 stars">
+												<i class="active fa fa-star"></i>
+											</label>
+											<input id="star-4" type="radio" name="rating" value="4" required>
+											<label for="star-4" title="4 stars">
+												<i class="active fa fa-star"></i>
+											</label>
+											<input id="star-3" type="radio" name="rating" value="3" required>
+											<label for="star-3" title="3 stars">
+												<i class="active fa fa-star"></i>
+											</label>
+											<input id="star-2" type="radio" name="rating" value="2" required>
+											<label for="star-2" title="2 stars">
+												<i class="active fa fa-star"></i>
+											</label>
+											<input id="star-1" type="radio" name="rating" value="1" required>
+											<label for="star-1" title="1 star">
+												<i class="active fa fa-star"></i>
+											</label>
+										</div>
+									</div>
+									<div class="form-group">
+										<label>Recommend?</label>
+										<div>
+											<input id="recommend-true" type="radio" name="recommend" value="True">
+											<label for="recommend-true" title="5 stars" required>
+												<i class="far fa-thumbs-up"></i>
+											</label>
+											<input id="recommend-false" type="radio" name="recommend" value="False">
+											<label for="recommend-false" title="4 stars" required>
+												<i class="far fa-thumbs-down"></i>
+											</label>
+										</div>
+									</div>
+									<div class="form-group">
+										<label>Your review</label>
+										<textarea id="review_desc" maxlength="100" class="form-control" name="text" required></textarea>
+									  
+									  <div class="d-flex justify-content-between mt-3"><small class="text-muted"><span id="chars">100</span> characters remaining</small></div>
+									</div>
+									<div class="submit-section">
+										<button type="submit" class="btn btn-primary submit-btn">Add Review</button>
+									</div>
+								</form>
+								<!-- /Write Review Form -->
+							{% else %}
+								<h4>You Can't Write a review for <strong>Dr. Darren Elder</strong></h4>
+							{% endif %}
+							</div>
+							<!-- /Write Review -->
+						{% endif %}
+				
+						</div>
+						<!-- /Reviews Content -->
+						
+						<!-- Business Hours Content -->
+						<div role="tabpanel" id="doc_business_hours" class="tab-pane fade">
+							<div class="row">
+								<div class="col-md-6 offset-md-3">
+								
+									<!-- Business Hours Widget -->
+									<div class="widget business-widget">
+										<div class="widget-content">
+											<div class="listing-hours">
+												<div class="listing-day current">
+													<div class="day">Today <span>{% now "DATE_FORMAT" %}</span></div>
+													<div class="time-items">
+														<span class="open-status">
+														{% if doctor.open_now %}
+															<span class="badge bg-success-light">Open Now</span></span>
+														{% else %}
+															<span class="badge bg-danger-light">Closed Now</span></span>
+														{% endif %}
+													{% for slot in doctor.today_time_slots %}
+														<span class="time">{{slot.start_time|time:"h:i A"}} - {{slot.end_time|time:"h:i A"}}</span>
+													{% endfor %}
+													</div>
+												</div>
+											{% for schdl in schedule %}
+												<div class="listing-day">
+													<div class="day">{{schdl.day}}</div>
+													<div class="time-items">
+												{% if schdl.timeslots.count > 0 %}
+													{% for slot in schdl.timeslots %}
+														<span class="time">{{slot.start_time|time:"h:i A"}} - {{slot.end_time|time:"h:i A"}}</span>
+													{% endfor %}
+												{% else %}
+														<span class="time"><span class="badge bg-danger-light">Closed</span></span>
+												{% endif %}
+													</div>
+												</div>
+											{% endfor %}
+											</div>
+										</div>
+									</div>
+									<!-- /Business Hours Widget -->
+							
+								</div>
+							</div>
+						</div>
+						<!-- /Business Hours Content -->
+						
+					</div>
+				</div>
+			</div>
+			<!-- /Doctor Details Tab -->
+
+		</div>
+	</div>		
+	<!-- /Page Content -->
+
+{% endblock %}
+
+{% block modal %}	
+	{% for review in reviews %}
+	<!-- Add Review Modal -->
+	<div class="modal fade custom-modal" id="add_reply_{{review.id}}">
+		<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3 class="modal-title">Reply</h3>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				</div>
+				<form class="add-form" method="POST" action="{% url 'reply-review' %}">					
+					{% csrf_token %}
+					<div class="modal-body">
+						<input type="text" name="review" value="{{review.id}}" style="display: none;">
+						<input type="text" name="next" value="{{request.path_info}}" style="display: none;">
+						<div class="form-group">
+							<label>Reply</label>
+							<textarea id="review_desc" maxlength="100" class="form-control" name="text" required></textarea>
+							<div class="d-flex justify-content-between mt-3"><small class="text-muted"><span id="chars">100</span> characters remaining</small></div>
+						</div>
+						<div class="submit-section text-center">
+							<button type="submit" class="btn btn-primary submit-btn">Post</button>
+							<button type="button" class="btn btn-secondary submit-btn" data-dismiss="modal">Cancel</button>							
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<!-- /Add Review Modal -->
+	{% endfor %}
+{% endblock %}
+
+{% block javascript %}
+		
+	<!-- Fancybox JS -->
+	<script src="{% static 'cas/plugins/fancybox/jquery.fancybox.min.js' %}"></script>
+
+	<script src="{% static 'cas/js/ajax.js' %}"></script>		
+{% endblock %}

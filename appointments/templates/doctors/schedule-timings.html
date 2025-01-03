@@ -1,0 +1,317 @@
+{% extends "doctors/base.html" %}
+
+{% block title %} Schedule Timings{% endblock %}
+
+{% load static %}
+
+{% block css %}
+	<!-- Select2 CSS -->
+	<link rel="stylesheet" href="{% static 'cas/plugins/select2/css/select2.min.css' %}">	
+{% endblock %}
+
+{% block breadcrumb %}Schedule Timings {% endblock %}
+{% block breadcrumb1 %} Schedule Timings{% endblock %}
+
+{% block sidenav %}
+<ul>
+	<li>
+		<a href="{% url 'doctor-dashboard' %}">
+			<i class="fas fa-columns"></i>
+			<span>Dashboard</span>
+		</a>
+	</li>
+	<li>
+		<a href="{% url 'appointments' %}">
+			<i class="fas fa-calendar-check"></i>
+			<span>Appointments</span>
+		</a>
+	</li>
+	<li>
+		<a href="{% url 'my-patients' %}">
+			<i class="fas fa-user-injured"></i>
+			<span>My Patients</span>
+		</a>
+	</li>
+	<li class="active">
+		<a href="{% url 'schedule-timings' %}">
+			<i class="fas fa-hourglass-start"></i>
+			<span>Schedule Timings</span>
+		</a>
+	</li>
+	<li>
+		<a href="{% url 'invoices' %}">
+			<i class="fas fa-file-invoice"></i>
+			<span>Invoices</span>
+		</a>
+	</li>
+	<li>
+		<a href="{% url 'reviews' %}">
+			<i class="fas fa-star"></i>
+			<span>Reviews</span>
+		</a>
+	</li>
+ 
+	<li>
+		<a href="{% url 'doctor-profile-settings' %}">
+			<i class="fas fa-user-cog"></i>
+			<span>Profile Settings</span>
+		</a>
+	</li>
+ 
+	<li>
+		<a href="{% url 'doctor-change-password' %}">
+			<i class="fas fa-lock"></i>
+			<span>Change Password</span>
+		</a>
+	</li>
+	<li>
+		<a href="{% url 'logout' %}">
+			<i class="fas fa-sign-out-alt"></i>
+			<span>Logout</span>
+		</a>
+	</li>
+</ul>
+{% endblock %}
+
+{% block content %}
+
+	<div class="col-md-7 col-lg-8 col-xl-9">
+	 
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="card">
+					<div class="card-body">
+						<h4 class="card-title">Schedule Timings</h4>
+						<div class="profile-box">
+							<div class="row">
+
+								<div class="col-lg-4">
+									<div class="form-group">               
+										<label>Timing Slot Duration</label>
+										<select class="select form-control">
+											<option>-</option>
+											<option>15 mins</option>
+											<option selected="selected">30 mins</option>  
+											<option>45 mins</option>
+											<option>1 Hour</option>
+										</select>
+									</div>
+								</div>
+
+							</div>     
+							<div class="row">
+								<div class="col-md-12">
+									<div class="card schedule-widget mb-0">
+									
+										<!-- Schedule Header -->
+										<div class="schedule-header">
+										
+											<!-- Schedule Nav -->
+											<div class="schedule-nav">
+												<ul class="nav nav-tabs nav-justified">
+												{% for schedule in schedules %}
+													<li class="nav-item">
+													{% if forloop.counter == 1 %}
+														<a class="nav-link active" data-toggle="tab" href="#slot_{{schedule.day}}">{{schedule.day}}</a>
+													{% else %}
+														<a class="nav-link" data-toggle="tab" href="#slot_{{schedule.day}}">{{schedule.day}}</a>
+													{% endif %}
+													</li>
+												{% endfor %}
+												</ul>
+											</div>
+											<!-- /Schedule Nav -->
+											
+										</div>
+										<!-- /Schedule Header -->
+										
+										<!-- Schedule Content -->
+										<div class="tab-content schedule-cont">
+										{% for schedule in schedules %}
+											<!-- {{schedule.day}} Slot -->
+											{% if forloop.counter == 1 %}
+											<div id="slot_{{schedule.day}}" class="tab-pane fade show active">
+											{% else %}
+											<div id="slot_{{schedule.day}}" class="tab-pane fade">
+											{% endif %}
+											{% if schedule.timeslots %}	
+												<h4 class="card-title d-flex justify-content-between">
+													<span>Time Slots</span> 
+													<a class="edit-link" data-toggle="modal" href="#edit_time_slot_{{schedule.day}}"><i class="fa fa-edit mr-1"></i>Edit</a>
+												</h4>
+											
+												<!-- Slot List -->
+												<div class="doc-times">
+												{% for timeslot in schedule.timeslots %}
+													<div class="doc-slot-list">
+														{{timeslot.slot}}
+														<a href="{% url 'delete-timeslot' timeslot.slot|slugify timeslot.id %}" class="delete_schedule">
+															<i class="fa fa-times"></i>
+														</a>
+													</div>
+												{% endfor %}
+												</div>
+												<!-- /Slot List -->
+											{% else %}
+												<h4 class="card-title d-flex justify-content-between">
+													<span>Time Slots</span> 
+													<a class="edit-link" data-toggle="modal" href="#add_time_slot_{{schedule.day}}"><i class="fa fa-plus-circle"></i> Add Slot</a>
+												</h4>
+												<p class="text-muted mb-0">Not Available</p>
+											{% endif %}
+											</div>
+											<!-- /{{schedule.day}} Slot -->
+										{% endfor %}
+										</div>
+										<!-- /Schedule Content -->
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+			
+	</div>
+{% endblock %}
+
+
+{% block modal %}
+	{% for schedule in schedules %}
+	{% if schedule.timeslots %}
+	<!-- Edit Time Slot Modal -->
+	<div class="modal fade custom-modal" id="edit_time_slot_{{schedule.day}}">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Edit Time Slots</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form class="add-form" method="POST" action="{% url 'update-timeslot' %}">
+						<div class="edit_hours-info">
+							{% csrf_token %}
+							<input type="text" name="schedule" value="{{schedule.id}}" style="display: none;">
+						{% for timeslot in schedule.timeslots %}
+							<div class="row form-row hours-cont">
+								<div class="col-12 col-md-10">
+									<div class="row form-row">
+										<div class="col-12 col-md-6">
+											<div class="form-group">
+												<label>Start Time</label>
+												<select class="form-control" name="start_time{{timeslot.id}}">
+													<option value="{{timeslot.start_time|time:"H:i:s"}}" selected>{{timeslot.start_time|time:"h.i A"}}</option>
+													{% for f24, f12 in hours.items %}
+													<option value="{{f24}}">{{f12}}</option>
+													{% endfor %}
+												</select>
+											</div> 
+										</div>
+										<div class="col-12 col-md-6">
+											<div class="form-group">
+												<label>End Time</label>
+												<select class="form-control" name="end_time{{timeslot.id}}">
+													<option value="{{timeslot.end_time|time:"H:i:s"}}" selected>{{timeslot.end_time|time:"h.i A"}}</option>  
+												{% for f24, f12 in hours.items %}
+													<option value="{{f24}}">{{f12}}</option>
+												{% endfor %}
+												</select>
+											</div> 
+										</div>
+									</div>
+								</div>
+								<div class="col-12 col-md-2"><label class="d-md-block d-sm-none d-none">&nbsp;</label><a href="#" class="btn btn-danger trash"><i class="far fa-trash-alt"></i></a></div>
+							</div>
+						{% endfor %}
+						<input type="text" name="edit_form-num" value="0" style="display: none;">
+						</div>
+						
+						<div class="add-more mb-3">
+							<a href="javascript:void(0);" class="edit-hours"><i class="fa fa-plus-circle"></i> Add More</a>
+						</div>
+						<div class="submit-section text-center">
+							<button type="submit" class="btn btn-primary submit-btn">Save Changes</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /Edit Time Slot Modal -->
+
+	{% else %}
+	<!-- Add Time Slot Modal -->
+	<div class="modal fade custom-modal" id="add_time_slot_{{schedule.day}}">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Add Time Slots</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form class="add-form" method="POST" action="{% url 'new-timeslot' %}">
+						<div class="hours-info">
+							{% csrf_token %}
+							<input type="text" name="schedule" value="{{schedule.id}}" style="display: none;">
+							<div class="row form-row hours-cont">
+								<div class="col-12 col-md-10">
+									<div class="row form-row">
+										<div class="col-12 col-md-6">
+											<div class="form-group">
+												<label>Start Time</label>
+												<select class="form-control" name="start_time_0">
+													<option value="">-</option>
+												{% for f24, f12 in hours.items %}
+													<option value="{{f24}}">{{f12}}</option>
+												{% endfor %}
+												</select>
+											</div> 
+										</div>
+										<div class="col-12 col-md-6">
+											<div class="form-group">
+												<label>End Time</label>
+												<select class="form-control" name="end_time_0">
+													<option value="">-</option>
+												{% for f24, f12 in hours.items %}
+													<option value="{{f24}}">{{f12}}</option>
+												{% endfor %}
+												</select>
+											</div> 
+										</div>
+									</div>
+								</div>
+							</div>
+							<input type="text" name="add_form-num" value="1" style="display: none;">
+						</div>
+						
+						<div class="add-more mb-3">
+							<a href="javascript:void(0);" class="add-hours"><i class="fa fa-plus-circle"></i> Add More</a>
+						</div>
+						<div class="submit-section text-center">
+							<button type="submit" class="btn btn-primary submit-btn">Save Changes</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /Add Time Slot Modal -->
+	{% endif %}
+	{% endfor %}
+	
+	
+{% endblock %}
+	  
+{% block javascript %}
+	<!-- Select2 JS -->
+	<script src="{% static 'cas/plugins/select2/js/select2.min.js' %}"></script>
+
+	<!-- Custom JS -->
+	<script src="{% static 'cas/js/ajax.js' %}"></script>
+	
+{% endblock %}	

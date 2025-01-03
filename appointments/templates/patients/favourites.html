@@ -1,0 +1,104 @@
+{% extends "patients/base.html" %}
+
+{% block title %}Patients - Favourites{% endblock %}
+
+{% load static %}
+
+{% block breadcrumb %}Favourites{% endblock %}
+{% block breadcrumb1 %}Favourites{% endblock %}
+
+{% block sidenav %}
+	<ul>
+		<li>
+			<a href="{% url 'patient-dashboard' %}">
+				<i class="fas fa-columns"></i>
+				<span>Dashboard</span>
+			</a>
+		</li>
+		<li class="active">
+			<a href="{% url 'favourites' %}">
+				<i class="fas fa-bookmark"></i>
+				<span>Favourites</span>
+			</a>
+		</li>
+
+		<li>
+			<a href="{% url 'profile-settings' %}">
+				<i class="fas fa-user-cog"></i>
+				<span>Profile Settings</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'change-password' %}">
+				<i class="fas fa-lock"></i>
+				<span>Change Password</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'logout' %}">
+				<i class="fas fa-sign-out-alt"></i>
+				<span>Logout</span>
+			</a>
+		</li>
+	</ul>
+{% endblock %}
+
+{% block content %}										
+	<div class="col-md-7 col-lg-8 col-xl-9">
+		<div class="row row-grid">
+		{% for favourite in favourites %}
+			<div class="col-md-6 col-lg-4 col-xl-3">
+				<div class="profile-widget">
+					<div class="doc-img">
+						<a href="{% url 'doctor-profile' favourite.doctor.full_name|slugify favourite.doctor.id %}">
+							<img class="img-fluid" alt="User Image" src="{{favourite.doctor.image.url}}">
+						</a>
+						<a href="{% url 'favourite-doctor' favourite.doctor.full_name|slugify favourite.doctor.id %}" class="fav-btn">
+							<i class="far fa-bookmark"></i>
+						</a>
+					</div>
+					<div class="pro-content">
+						<h3 class="title">
+							<a href="{% url 'doctor-profile' favourite.doctor.full_name|slugify favourite.doctor.id %}">{{favourite.doctor.first_name}} {{favourite.doctor.second_name}}</a> 
+							<i class="fas fa-check-circle verified"></i>
+						</h3>
+						<p class="speciality">{{favourite.doctor.latest_degree}}</p>
+						<div class="rating">
+						{% for x, filled in favourite.doctor.review.items %}	
+							<i class="fas fa-star {{filled}}"></i>
+						{% endfor %}
+							<span class="d-inline-block average-rating">({{favourite.doctor.total_reviews}})</span>
+						</div>
+						<ul class="available-info">
+							<li>
+								<i class="fas fa-map-marker-alt"></i> {{favourite.doctor.county}}, {{favourite.doctor.country}}
+							</li>
+							<li>
+								<i class="far fa-clock"></i> {{favourite.doctor.availability}}
+							</li>
+							<li>
+								<i class="far fa-money-bill-alt"></i> $ {{favourite.doctor.pricing}} <i class="fas fa-info-circle" data-toggle="tooltip" title="Lorem Ipsum"></i>
+							</li>
+						</ul>
+						<div class="row row-sm">
+							<div class="col-6">
+								<a href="{% url 'doctor-profile' favourite.doctor.full_name|slugify favourite.doctor.id %}" class="btn view-btn">View Profile</a>
+							</div>
+							<div class="col-6">
+								<a href="{% url 'booking' favourite.doctor.full_name|slugify favourite.doctor.id %}" class="btn book-btn">Book Now</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		{% endfor %}
+			
+			
+		</div>
+	</div>
+					
+{% endblock %}
+
+{% block javascript %}
+	<script src="{% static 'cas/js/ajax.js' %}"></script>
+{% endblock %}

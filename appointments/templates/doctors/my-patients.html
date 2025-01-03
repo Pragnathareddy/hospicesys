@@ -1,0 +1,110 @@
+{% extends "doctors/base.html" %}
+
+{% block title %}My Patients{% endblock %}
+
+{% load static %}
+
+{% block breadcrumb %}My Patients{% endblock %}
+{% block breadcrumb1 %}My Patients{% endblock %}
+
+{% block sidenav %}
+	<ul>
+		<li>
+			<a href="{% url 'doctor-dashboard' %}">
+				<i class="fas fa-columns"></i>
+				<span>Dashboard</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'appointments' %}">
+				<i class="fas fa-calendar-check"></i>
+				<span>Appointments</span>
+			</a>
+		</li>
+		<li class="active">
+			<a href="{% url 'my-patients' %}">
+				<i class="fas fa-user-injured"></i>
+				<span>My Patients</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'schedule-timings' %}">
+				<i class="fas fa-hourglass-start"></i>
+				<span>Schedule Timings</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'invoices' %}">
+				<i class="fas fa-file-invoice"></i>
+				<span>Invoices</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'reviews' %}">
+				<i class="fas fa-star"></i>
+				<span>Reviews</span>
+			</a>
+		</li>
+ 
+		<li>
+			<a href="{% url 'doctor-profile-settings' %}">
+				<i class="fas fa-user-cog"></i>
+				<span>Profile Settings</span>
+			</a>
+		</li>
+ 
+		<li>
+			<a href="{% url 'doctor-change-password' %}">
+				<i class="fas fa-lock"></i>
+				<span>Change Password</span>
+			</a>
+		</li>
+		<li>
+			<a href="{% url 'logout' %}">
+				<i class="fas fa-sign-out-alt"></i>
+				<span>Logout</span>
+			</a>
+		</li>
+	</ul>
+{% endblock %}
+
+{% block content %}						
+	<div class="col-md-7 col-lg-8 col-xl-9">
+	
+		<div class="row row-grid">
+		{% for patient in patients %}
+			<div class="col-md-6 col-lg-4 col-xl-3">
+				<div class="card widget-profile pat-widget-profile">
+					<div class="card-body">
+						<div class="pro-widget-content">
+							<div class="profile-info-widget">
+								<a href="{% url 'patient-profile' patient|slugify patient.id %}" class="booking-doc-img">
+									<img src="{{patient.image.url}}" alt="User Image">
+								</a>
+								<div class="profile-det-info">
+									<h3><a href="{% url 'patient-profile' patient|slugify patient.id %}">{{patient.first_name}} {{patient.second_name}}</a></h3>
+									
+									<div class="patient-details">
+										<h5><b>Patient ID :</b> P000{{patient.id}}</h5>
+										<h5 class="mb-0"><i class="fas fa-map-marker-alt"></i>{{patient.county}}, {{patient.country}}</h5>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="patient-info">
+							<ul>
+								<li>Phone <span>{{patient.phone_no}}</span></li>
+								<li>Age <span>{{patient.d_o_b|timesince }}, {{patient.gender}}</span></li>
+								<li>Blood Group <span>{{patient.blood_group}}</span></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		{% endfor %}					
+								
+		</div>
+
+	</div>
+{% endblock %}
+			

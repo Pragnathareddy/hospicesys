@@ -1,0 +1,212 @@
+{% extends "cas/base.html" %}
+
+{% block title %}Book Appointment{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header text-center">
+            <h3>Book an Appointment with {{ doctor.title }} {{ doctor.first_name }} {{ doctor.second_name }}</h3>
+        </div>
+        <div class="card-body">
+            <!-- Weekly Navigation -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <button id="prevWeek" class="btn btn-link fs-3" style="color: #007bff;" disabled>&laquo; Previous Week</button>
+                <div id="currentWeekRange" class="fw-bold"></div>
+                <button id="nextWeek" class="btn btn-link fs-3" style="color: #007bff;">  Next Week &raquo;</button>
+            </div>
+
+            <!-- Weekly Time Slots -->
+            <div class="table-responsive">
+                <table class="table text-center">
+                    <thead>
+                        <tr id="weekDays"></tr>
+                    </thead>
+                    <tbody>
+                        <tr id="weekSlots"></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Book Appointment Button -->
+            <div class="text-center">
+                <button id="bookButton" class="btn btn-success mt-4" disabled>Book Appointment</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const weeklySchedule = JSON.parse('{{ weekly_schedule|escapejs }}');
+    const bookedAppointments = JSON.parse('{{ booked_appointments|escapejs }}');
+
+    const weekDays = document.getElementById('weekDays');
+    const weekSlots = document.getElementById('weekSlots');
+    const bookButton = document.getElementById('bookButton');
+    const prevWeek = document.getElementById('prevWeek');
+    const nextWeek = document.getElementById('nextWeek');
+    const currentWeekRange = document.getElementById('currentWeekRange');
+
+    let selectedDate = null;
+    let selectedTime = null;
+    let currentStartDate = new Date();
+
+    // Utility function to format a date (YYYY-MM-DD)
+    const formatDate = (date) => date.toISOString().split('T')[0];
+
+    // Utility function to format the week range
+    const getWeekRange = (startDate) => {
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+        return `${startDate.toDateString()} - ${endDate.toDateString()}`;
+    };
+
+    // Render weekly slots dynamically
+    const renderWeek = () => {
+        weekDays.innerHTML = '';
+        weekSlots.innerHTML = '';
+
+        const today = new Date();
+        currentWeekRange.textContent = getWeekRange(currentStartDate);
+
+        // Enable/disable the "Previous Week" button
+        prevWeek.disabled = currentStartDate <= today;
+
+        for (let i = 0; i < 7; i++) {
+            const currentDate = new Date(currentStartDate);
+            currentDate.setDate(currentStartDate.getDate() + i);
+            const formattedDate = formatDate(currentDate);
+            const dayOfWeek = currentDate.toLocaleString('default', { weekday: 'long' }).toLowerCase();
+
+            // Add the day header
+            const dayHeader = document.createElement('th');
+            dayHeader.innerHTML = `<div class="fw-bold">${currentDate.toLocaleString('default', { weekday: 'short' })}</div>
+                                   <div>${currentDate.toLocaleDateString()}</div>`;
+            weekDays.appendChild(dayHeader);
+
+            // Add slots for the day
+            const slotCell = document.createElement('td');
+            if (weeklySchedule[dayOfWeek] && weeklySchedule[dayOfWeek].slots.length > 0) {
+                const slots = generateAvailableSlots(weeklySchedule[dayOfWeek], formattedDate);
+                if (slots.length > 0) {
+                    slots.forEach(slot => {
+                        const slotButton = document.createElement('button');
+                        slotButton.className = 'btn btn-sm btn-outline-primary d-block mb-2';
+                        slotButton.textContent = slot;
+                        slotButton.onclick = () => {
+                            selectedDate = formattedDate;
+                            selectedTime = slot;
+                            bookButton.disabled = false;
+                            highlightSelection(slotButton);
+                        };
+                        slotCell.appendChild(slotButton);
+                    });
+                } else {
+                    slotCell.textContent = 'Unavailable';
+                    slotCell.className = 'text-muted';
+                }
+            } else {
+                slotCell.textContent = 'Unavailable';
+                slotCell.className = 'text-muted';
+            }
+            weekSlots.appendChild(slotCell);
+        }
+    };
+
+    // Generate available slots based on schedule and booked appointments
+    const generateAvailableSlots = (schedule, date) => {
+        const slots = [];
+        const interval = schedule.interval;
+        schedule.slots.forEach(slot => {
+            const [startHour, startMinute] = slot.start_time.split(':').map(Number);
+            const [endHour, endMinute] = slot.end_time.split(':').map(Number);
+
+            let currentTime = new Date();
+            currentTime.setHours(startHour, startMinute, 0);
+
+            const endTime = new Date();
+            endTime.setHours(endHour, endMinute, 0);
+
+            while (currentTime < endTime) {
+                const slotTime = currentTime.toTimeString().slice(0, 5); // Format HH:MM
+                if (!bookedAppointments[date] || !bookedAppointments[date].includes(slotTime)) {
+                    slots.push(currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                }
+                currentTime.setMinutes(currentTime.getMinutes() + interval);
+            }
+        });
+        return slots;
+    };
+
+    // Highlight the selected slot
+    const highlightSelection = (button) => {
+        const allButtons = document.querySelectorAll('.btn-outline-primary');
+        allButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+    };
+
+// Handle appointment booking
+bookButton.addEventListener('click', () => {
+    if (!selectedDate || !selectedTime) {
+        alert('Please select a date and time slot.');
+        return;
+    }
+
+    fetch('/patients/book-appointment/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is included
+        },
+        body: JSON.stringify({
+            doctor: "{{ doctor.id }}", // Pass the correct doctor ID
+            time_date: `${selectedTime}_${selectedDate}`, // Format time and date
+        }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(data.success); // Show success message
+            if (data.redirect) {
+                window.location.href = data.redirect; // Redirect to the specified URL
+            } else {
+                renderWeek(); // Refresh the week's availability
+            }
+        } else {
+            alert(data.error || 'Failed to book the appointment.'); // Show error message
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while booking the appointment. Please try again.');
+    });
+});
+
+
+    // Navigate to the previous week
+    prevWeek.addEventListener('click', () => {
+        currentStartDate.setDate(currentStartDate.getDate() - 7);
+        renderWeek();
+    });
+
+    // Navigate to the next week
+    nextWeek.addEventListener('click', () => {
+        currentStartDate.setDate(currentStartDate.getDate() + 7);
+        renderWeek();
+    });
+
+    // Initial render
+    renderWeek();
+});
+</script>
+{% endblock %}

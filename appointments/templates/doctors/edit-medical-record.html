@@ -1,0 +1,123 @@
+{% extends "cas/base.html" %}
+
+{% block title %} Edit {{patient}} Prescription{% endblock %}
+
+{% load static %}
+
+{% block content %}
+			
+	<!-- Breadcrumb -->
+	<div class="breadcrumb-bar">
+		<div class="container-fluid">
+			<div class="row align-items-center">
+				<div class="col-md-12 col-12">
+					<nav aria-label="breadcrumb" class="page-breadcrumb">
+						<ol class="breadcrumb">
+							<li class="breadcrumb-item"><a href="{% url 'doctor-dashboard' %}">Home</a></li>
+							<li class="breadcrumb-item active" aria-current="page">Edit Medical Record</li>
+						</ol>
+					</nav>
+					<h2 class="breadcrumb-title">Edit Medical Record</h2>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /Breadcrumb -->
+			
+	<!-- Page Content -->
+	<div class="content">
+		<div class="container-fluid">
+
+			<div class="row">
+				<div class="col-md-5 col-lg-4 col-xl-3 theiaStickySidebar">
+				
+					<!-- Profile Widget -->
+					<div class="card widget-profile pat-widget-profile">
+						<div class="card-body">
+							<div class="pro-widget-content">
+								<div class="profile-info-widget">
+									<a href="#" class="booking-doc-img">
+										<img src="{{patient.image.url}}" alt="User Image">
+									</a>
+									<div class="profile-det-info">
+										<h3>{{patient}}</h3>
+										
+										<div class="patient-details">
+											<h5><b>Patient ID :</b> PT000{{patient.id}}</h5>
+											<h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> {{patient.county}}, {{patient.country}}</h5>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="patient-info">
+								<ul>
+									<li>Phone <span>{{patient.phone_no}}</span></li>
+									<li>Age <span>{{patient.d_o_b|timesince}}, {{patient.gender}}</span></li>
+									<li>Blood Group <span>{{patient.blood_group}}</span></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<!-- /Profile Widget -->
+					
+				</div>
+
+				<div class="col-md-7 col-lg-8 col-xl-9">
+					<div class="card">
+						<div class="card-header">
+							<h4 class="card-title mb-0">Edit Prescription</h4>
+						</div>
+						<div class="card-body">
+							<div class="row">
+								<div class="col-sm-6">
+									<div class="biller-info">
+										<h4 class="d-block">{{profile.full_name}}</h4>
+										<span class="d-block text-sm text-muted">{{profile.speciality.name}}</span>
+										<span class="d-block text-sm text-muted">{{profile.county}}, {{profile.country}}</span>
+									</div>
+								</div>
+								<div class="col-sm-6 text-sm-right">
+									<div class="billing-info">
+										<h4 class="d-block">{% now "DATE_FORMAT" %}</h4>
+										<span class="d-block text-muted">#UPDATE</span>
+									</div>
+								</div>
+							</div>
+							
+							<form enctype="multipart/form-data" method="post" action="{% url 'edit-medical-record' patient.id patient|slugify record.id %}">
+								{% csrf_token %}
+								<input type="text" name="patient" value="{{record.patient.id}}" style="display: none;">
+								<input type="text" name="doctor" value="{{record.doctor.id}}" style="display: none;">
+								<div class="form-group">
+									<label>Date</label>
+									<input type="text" class="form-control datetimepicker" name="date_recorded" value="{{record.date_recorded|date:"Y-m-d"}}">
+								</div>
+								<div class="form-group">
+									<label>Description ( Optional )</label>
+									<textarea class="form-control" name="description">{{record.description}}</textarea>
+								</div>
+								<div class="form-group">
+									<label>Upload File</label> 
+									{% for field in form %}
+										{% if field.name == 'attachment' %}
+											{{field}}
+										{% endif %}
+									{% endfor %}
+								</div>	
+								<div class="submit-section text-center">
+									<button type="submit" class="btn btn-primary submit-btn">Submit</button>
+									<button type="button" class="btn btn-secondary submit-btn" data-dismiss="modal">Cancel</button>							
+								</div>
+							</form>
+								
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+	</div>		
+	<!-- /Page Content -->
+{% endblock %}   
+			
